@@ -35,7 +35,7 @@ PostgreSQL is automatically configured to connect to the Docker Compose instance
 
 ```bash
 cd backend
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 The application will start at `http://localhost:8080`
