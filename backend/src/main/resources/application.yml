@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: app-backend
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/app_db
+    username: app_user
+    password: app_password
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  
+  web:
+    cors:
+      allowed-origins: "http://localhost:5173"
+      allowed-methods: "*"
+      allowed-headers: "*"
+
+server:
+  port: 8080
+
+# Twilio Configuration
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:your_account_sid}
+  auth-token: ${TWILIO_AUTH_TOKEN:your_auth_token}
+  phone-number: ${TWILIO_PHONE_NUMBER:your_phone_number}
+
+# Stripe Configuration
+stripe:
+  api-key: ${STRIPE_API_KEY:your_stripe_api_key}
+  webhook-secret: ${STRIPE_WEBHOOK_SECRET:your_webhook_secret}
+
+logging:
+  level:
+    root: INFO
+    com.example: DEBUG
