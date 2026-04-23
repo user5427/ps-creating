@@ -1,13 +1,15 @@
 spring:
   application:
     name: app-backend
-  
+  profiles:
+    active: dev
+
   datasource:
     url: jdbc:postgresql://localhost:5432/app_db
     username: app_user
     password: app_password
     driver-class-name: org.postgresql.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,7 +18,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: false
-  
+
   web:
     cors:
       allowed-origins: "http://localhost:5173"
@@ -36,6 +38,14 @@ twilio:
 stripe:
   api-key: ${STRIPE_API_KEY:your_stripe_api_key}
   webhook-secret: ${STRIPE_WEBHOOK_SECRET:your_webhook_secret}
+
+# Application settings
+app:
+  audit:
+    enabled: true          # toggles the AuditAspect (quality requirement #7)
+  dev:
+    organizer-id: 00000000-0000-0000-0000-000000000001
+    attendee-id:  00000000-0000-0000-0000-000000000002
 
 logging:
   level:
