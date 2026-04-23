@@ -3,6 +3,7 @@ package com.example.app.domain.event;
 import com.example.app.api.event.CreateEventRequest;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
+import com.example.app.aspect.Audited;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,7 @@ public class DefaultEventService implements EventService {
     }
 
     @Override
+    @Audited("event.create")
     public EventResponse create(CreateEventRequest request, UUID organizerId) {
         Event event = new Event(
                 request.title(),
@@ -54,6 +56,7 @@ public class DefaultEventService implements EventService {
     }
 
     @Override
+    @Audited("event.update")
     public EventResponse update(UUID id, UpdateEventRequest request, UUID actorId) {
         Event event = requireEvent(id);
 
