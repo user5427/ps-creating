@@ -19,7 +19,7 @@ export type CreateUser = z.infer<typeof CreateUserSchema>
 export const PaymentSchema = z.object({
   id: z.string(),
   amount: z.number().positive(),
-  currency: z.string().lowercase(),
+  currency: z.string().regex(/^[a-z]{3}$/),
   status: z.enum(['pending', 'succeeded', 'failed']),
   createdAt: z.string().datetime(),
 })
