@@ -3,13 +3,21 @@ package com.example.app.domain.user;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 200)
@@ -26,9 +34,11 @@ public class User {
     private Role role;
 
     @Version
+    @Setter(AccessLevel.NONE)
     private Long version;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
     private OffsetDateTime createdAt;
 
     @PrePersist
@@ -38,8 +48,6 @@ public class User {
         }
     }
 
-    protected User() {}
-
     public User(UUID id, String email, String firstName, String lastName, Role role) {
         this.id = id;
         this.email = email;
@@ -47,17 +55,4 @@ public class User {
         this.lastName = lastName;
         this.role = role;
     }
-
-    public UUID getId() { return id; }
-    public String getEmail() { return email; }
-    public String getFirstName() { return firstName; }
-    public String getLastName() { return lastName; }
-    public Role getRole() { return role; }
-    public Long getVersion() { return version; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
-
-    public void setEmail(String email) { this.email = email; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-    public void setRole(Role role) { this.role = role; }
 }
