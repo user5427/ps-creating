@@ -62,17 +62,7 @@ public class DefaultEventService implements EventService {
         requireCurrentVersion(event, request.version());
 
         OffsetDateTime previousStart = event.getStartTime();
-
-        event.setTitle(request.title());
-        event.setDescription(request.description());
-        event.setCategory(request.category());
-        event.setVenue(request.venue());
-        event.setImageUrl(request.imageUrl());
-        event.setStartTime(request.startTime());
-        event.setEndTime(request.endTime());
-        event.setCapacity(request.capacity());
-        event.setPrice(request.price());
-
+        applyUpdate(event, request);
         Event saved = eventRepository.save(event);
 
         if (!previousStart.isEqual(request.startTime()) && saved.getSeatsSold() > 0) {
@@ -94,6 +84,24 @@ public class DefaultEventService implements EventService {
             throw new EventAccessDeniedException(
                     "Only the organizer of this event can edit it");
         }
+    }
+
+    /**
+     * Single point where {@link UpdateEventRequest} is copied into a managed
+     * {@link Event}. Centralising the field-by-field assignment keeps the
+     * update service method short and gives us one place to revisit when new
+     * fields are added to the request DTO.
+     */
+    private static void applyUpdate(Event event, UpdateEventRequest request) {
+        event.setTitle(request.title());
+        event.setDescription(request.description());
+        event.setCategory(request.category());
+        event.setVenue(request.venue());
+        event.setImageUrl(request.imageUrl());
+        event.setStartTime(request.startTime());
+        event.setEndTime(request.endTime());
+        event.setCapacity(request.capacity());
+        event.setPrice(request.price());
     }
 
     /**
