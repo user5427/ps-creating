@@ -1,14 +1,19 @@
-import { Chip } from '@mui/material'
+import { Chip, type ChipProps } from '@mui/material'
 
-export function SoldOutChip() {
+export function SoldOutChip({ sx, size = 'small', ...rest }: Omit<ChipProps, 'label'>) {
   return (
     <Chip
+      {...rest}
+      size={size}
       label="Sold out"
-      sx={{
-        backgroundColor: '#1A1A1A',
-        color: '#FFFFFF',
-        fontWeight: 600,
-      }}
+      sx={[
+        (theme) => ({
+          backgroundColor: theme.palette.text.primary,
+          color: theme.palette.primary.contrastText,
+          fontWeight: 600,
+        }),
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
     />
   )
 }
