@@ -7,7 +7,7 @@ export function EventDetailPage() {
         Event detail
       </Typography>
       <Typography variant="body1" color="text.secondary">
-        Coming in PR9.
+        Loading event…
       </Typography>
     </Container>
   )

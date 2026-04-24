@@ -42,18 +42,20 @@ export function TopNav() {
         </Stack>
 
         <Stack direction="row" spacing={2} alignItems="center">
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-            <ToggleButtonGroup
-              size="small"
-              value={role}
-              exclusive
-              onChange={(_, next: Role | null) => next && setRole(next)}
-              aria-label="Dev role toggle"
-            >
-              <ToggleButton value="ATTENDEE">Attendee</ToggleButton>
-              <ToggleButton value="ORGANIZER">Organizer</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
+          {import.meta.env.DEV && (
+            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+              <ToggleButtonGroup
+                size="small"
+                value={role}
+                exclusive
+                onChange={(_, next: Role | null) => next && setRole(next)}
+                aria-label="Dev role toggle"
+              >
+                <ToggleButton value="ATTENDEE">Attendee</ToggleButton>
+                <ToggleButton value="ORGANIZER">Organizer</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+          )}
           <Button
             variant="contained"
             onClick={() => navigate({ to: '/events' })}

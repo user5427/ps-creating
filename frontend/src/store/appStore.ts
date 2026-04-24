@@ -3,10 +3,13 @@ import { persist } from 'zustand/middleware'
 
 export type Role = 'ORGANIZER' | 'ATTENDEE'
 
-// Dev-only UUIDs seeded by the backend's DevSeedRunner.
-// Must stay in sync with application.yml: app.dev.{organizer-id, attendee-id}.
-const SEEDED_ORGANIZER_ID = '00000000-0000-0000-0000-000000000001'
-const SEEDED_ATTENDEE_ID = '00000000-0000-0000-0000-000000000002'
+// Read seeded actor UUIDs from Vite env vars when provided so backend seed
+// changes don't require a frontend code change. Defaults match the UUIDs
+// written by the backend's DevSeedRunner (app.dev.{organizer-id, attendee-id}).
+const SEEDED_ORGANIZER_ID =
+  import.meta.env.VITE_DEV_ORGANIZER_ID ?? '00000000-0000-0000-0000-000000000001'
+const SEEDED_ATTENDEE_ID =
+  import.meta.env.VITE_DEV_ATTENDEE_ID ?? '00000000-0000-0000-0000-000000000002'
 
 interface AppState {
   actorId: string
