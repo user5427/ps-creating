@@ -7,25 +7,25 @@ import org.springframework.stereotype.Component;
 public class EventMapper {
 
     public EventResponse toResponse(Event event) {
-        return EventResponse.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .description(event.getDescription())
-                .category(event.getCategory())
-                .venue(event.getVenue())
-                .imageUrl(event.getImageUrl())
-                .startTime(event.getStartTime())
-                .endTime(event.getEndTime())
-                .capacity(event.getCapacity())
-                .seatsSold(event.getSeatsSold())
-                .remainingSeats(event.getRemainingSeats())
-                .soldOut(event.isSoldOut())
-                .price(event.getPrice())
-                .status(event.getStatus().name())
-                .organizerId(event.getOrganizerId())
-                .version(event.getVersion())
-                .createdAt(event.getCreatedAt())
-                .updatedAt(event.getUpdatedAt())
-                .build();
+        return new EventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getDescription(),
+                event.getCategory(),
+                event.getVenue(),
+                event.getImageUrl(),
+                event.getStartTime(),
+                event.getEndTime(),
+                event.getCapacity(),
+                event.getSeatsSold(),
+                event.getRemainingSeats(),
+                event.isSoldOut(),
+                event.getPrice(),
+                event.getStatus().name(),
+                event.getOrganizerId(),
+                event.getVersion(),
+                event.getCreatedAt(),
+                event.getUpdatedAt()
+        );
     }
 }

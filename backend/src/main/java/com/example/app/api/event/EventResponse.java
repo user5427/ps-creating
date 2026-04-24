@@ -3,9 +3,7 @@ package com.example.app.api.event;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.Builder;
 
-@Builder
 public record EventResponse(
         UUID id,
         String title,
