@@ -11,7 +11,7 @@ export function EventFormPage({ mode }: Props) {
         {mode === 'create' ? 'Create event' : 'Edit event'}
       </Typography>
       <Typography variant="body1" color="text.secondary">
-        Loading form…
+        Coming in PR10.
       </Typography>
     </Container>
   )

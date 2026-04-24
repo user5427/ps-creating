@@ -8,7 +8,7 @@ export function EventsListPage() {
           Events
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Loading catalog…
+          List coming in PR9.
         </Typography>
       </Box>
     </Container>
