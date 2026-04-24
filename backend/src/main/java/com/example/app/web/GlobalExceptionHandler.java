@@ -15,9 +15,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EventNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(EventNotFoundException ex) {
+        String message = "Event %s does not exist".formatted(ex.getEventId());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ErrorResponse.simple("NOT_FOUND", ex.getMessage()));
+                .body(ErrorResponse.simple("NOT_FOUND", message));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -3,7 +3,15 @@ package com.example.app.domain.event;
 import java.util.UUID;
 
 public class EventNotFoundException extends RuntimeException {
-    public EventNotFoundException(UUID id) {
-        super("Event not found: " + id);
+
+    private final UUID eventId;
+
+    public EventNotFoundException(UUID eventId) {
+        super("Event not found: " + eventId);
+        this.eventId = eventId;
+    }
+
+    public UUID getEventId() {
+        return eventId;
     }
 }
