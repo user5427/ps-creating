@@ -10,15 +10,20 @@ const apiClient = axios.create({
   },
 })
 
-// Dev-only: attach the current actor's UUID on every request.
-// The backend's ActorInterceptor consumes it; real auth replaces this later.
-apiClient.interceptors.request.use((config) => {
-  const actorId = useAppStore.getState().actorId
-  if (actorId) {
-    config.headers.set('X-Actor-Id', actorId)
-  }
-  return config
-})
+// Dev-only: attach the current actor's UUID on every request so the backend's
+// ActorInterceptor can resolve the acting user. Disabled in production builds
+// so real auth isn't bypassed by a fake header.
+if (import.meta.env.DEV) {
+  apiClient.interceptors.request.use((config) => {
+    const actorId = useAppStore.getState().actorId
+    if (actorId) {
+      config.headers = config.headers ?? {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(config.headers as any)['X-Actor-Id'] = actorId
+    }
+    return config
+  })
+}
 
 apiClient.interceptors.response.use(
   (response) => response,

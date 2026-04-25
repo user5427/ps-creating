@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -31,16 +31,20 @@ interface Props {
   mode: Mode
 }
 
-const DEFAULTS: EventFormValues = {
-  title: '',
-  description: '',
-  category: '',
-  venue: '',
-  imageUrl: undefined,
-  startTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000),
-  capacity: 100,
-  price: 0,
+/** Generate fresh "future" defaults each time the component mounts so a long-open SPA doesn't end up with stale (potentially past) default times. */
+function buildDefaults(): EventFormValues {
+  const weekFromNow = Date.now() + 7 * 24 * 60 * 60 * 1000
+  return {
+    title: '',
+    description: '',
+    category: '',
+    venue: '',
+    imageUrl: undefined,
+    startTime: new Date(weekFromNow),
+    endTime: new Date(weekFromNow + 2 * 60 * 60 * 1000),
+    capacity: 100,
+    price: 0,
+  }
 }
 
 export function EventFormPage({ mode }: Props) {
@@ -48,7 +52,13 @@ export function EventFormPage({ mode }: Props) {
   const eventId = params.eventId as string | undefined
   const navigate = useNavigate()
 
-  const { data: existing, isLoading } = useEvent(mode === 'edit' ? eventId : undefined)
+  const {
+    data: existing,
+    isLoading: isLoadingExisting,
+    isError: isLoadExistingError,
+    error: loadExistingError,
+    refetch: refetchExisting,
+  } = useEvent(mode === 'edit' ? eventId : undefined)
   const createMutation = useCreateEvent()
   const updateMutation = useUpdateEvent(eventId ?? '')
 
@@ -56,9 +66,11 @@ export function EventFormPage({ mode }: Props) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [conflict, setConflict] = useState<EventResponse | null>(null)
 
+  const defaultValues = useMemo(() => buildDefaults(), [])
+
   const form = useForm<EventFormValues>({
     resolver: zodResolver(EventFormSchema),
-    defaultValues: DEFAULTS,
+    defaultValues,
   })
 
   useEffect(() => {
@@ -90,9 +102,8 @@ export function EventFormPage({ mode }: Props) {
       if (mode === 'create') {
         const created = await createMutation.mutateAsync(payload)
         navigate({ to: '/events/$eventId', params: { eventId: created.id } })
-      } else if (eventId) {
-        const version = overwriteVersion ?? existing?.version
-        if (version == null) throw new Error('Missing version')
+      } else if (eventId && existing) {
+        const version = overwriteVersion ?? existing.version
         const updated = await updateMutation.mutateAsync({ ...payload, version })
         navigate({ to: '/events/$eventId', params: { eventId: updated.id } })
       }
@@ -123,13 +134,41 @@ export function EventFormPage({ mode }: Props) {
 
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
-  if (mode === 'edit' && isLoading) {
+  if (mode === 'edit' && isLoadingExisting) {
     return (
       <Container sx={{ py: 10, textAlign: 'center' }}>
         <CircularProgress />
       </Container>
     )
   }
+
+  if (mode === 'edit' && (isLoadExistingError || !existing)) {
+    const notFound =
+      loadExistingError instanceof AxiosError &&
+      loadExistingError.response?.status === 404
+    return (
+      <Container maxWidth="sm" sx={{ py: 10 }}>
+        <Alert
+          severity={notFound ? 'warning' : 'error'}
+          action={
+            notFound ? (
+              <Button color="inherit" size="small" onClick={() => navigate({ to: '/events' })}>
+                Back to events
+              </Button>
+            ) : (
+              <Button color="inherit" size="small" onClick={() => refetchExisting()}>
+                Retry
+              </Button>
+            )
+          }
+        >
+          {notFound ? "Event not found, so it can't be edited." : 'Failed to load the event.'}
+        </Alert>
+      </Container>
+    )
+  }
+
+  const formDisabled = isSubmitting || (mode === 'edit' && !existing)
 
   return (
     <Container maxWidth="sm" sx={{ py: { xs: 4, md: 8 } }}>
@@ -164,6 +203,7 @@ export function EventFormPage({ mode }: Props) {
                 error={!!fieldState.error || !!fieldErrors.title}
                 helperText={fieldState.error?.message ?? fieldErrors.title}
                 required
+                disabled={formDisabled}
               />
             )}
           />
@@ -179,6 +219,7 @@ export function EventFormPage({ mode }: Props) {
                 error={!!fieldState.error || !!fieldErrors.description}
                 helperText={fieldState.error?.message ?? fieldErrors.description}
                 required
+                disabled={formDisabled}
               />
             )}
           />
@@ -196,6 +237,7 @@ export function EventFormPage({ mode }: Props) {
                   'e.g. Music, Tech, Sports'
                 }
                 required
+                disabled={formDisabled}
               />
             )}
           />
@@ -209,6 +251,7 @@ export function EventFormPage({ mode }: Props) {
                 error={!!fieldState.error || !!fieldErrors.venue}
                 helperText={fieldState.error?.message ?? fieldErrors.venue}
                 required
+                disabled={formDisabled}
               />
             )}
           />
@@ -222,6 +265,7 @@ export function EventFormPage({ mode }: Props) {
                 label="Image URL (optional)"
                 error={!!fieldState.error || !!fieldErrors.imageUrl}
                 helperText={fieldState.error?.message ?? fieldErrors.imageUrl}
+                disabled={formDisabled}
               />
             )}
           />
@@ -234,6 +278,7 @@ export function EventFormPage({ mode }: Props) {
                   label="Start time"
                   value={field.value}
                   onChange={(v) => field.onChange(v)}
+                  disabled={formDisabled}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -253,6 +298,7 @@ export function EventFormPage({ mode }: Props) {
                   label="End time"
                   value={field.value}
                   onChange={(v) => field.onChange(v)}
+                  disabled={formDisabled}
                   slotProps={{
                     textField: {
                       fullWidth: true,
@@ -281,6 +327,7 @@ export function EventFormPage({ mode }: Props) {
                   error={!!fieldState.error || !!fieldErrors.capacity}
                   helperText={fieldState.error?.message ?? fieldErrors.capacity}
                   required
+                  disabled={formDisabled}
                 />
               )}
             />
@@ -302,6 +349,7 @@ export function EventFormPage({ mode }: Props) {
                   error={!!fieldState.error || !!fieldErrors.price}
                   helperText={fieldState.error?.message ?? fieldErrors.price}
                   required
+                  disabled={formDisabled}
                 />
               )}
             />
@@ -311,7 +359,7 @@ export function EventFormPage({ mode }: Props) {
               type="submit"
               variant="contained"
               size="large"
-              disabled={isSubmitting}
+              disabled={formDisabled}
             >
               {mode === 'create' ? 'Create event' : 'Save changes'}
             </Button>

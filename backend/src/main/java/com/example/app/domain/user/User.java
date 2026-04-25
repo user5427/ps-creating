@@ -8,10 +8,8 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
 
-    // Ids are externally assigned (auth provider when real login lands,
-    // DevSeedRunner in development). No @GeneratedValue to avoid Hibernate's
-    // "detached entity with generated id" confusion on manual persist.
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 200)
