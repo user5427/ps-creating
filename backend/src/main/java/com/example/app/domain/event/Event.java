@@ -4,10 +4,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Table(
@@ -17,14 +13,10 @@ import lombok.Setter;
                 @Index(name = "idx_events_organizer", columnList = "organizer_id")
         }
 )
-@Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Setter(AccessLevel.NONE)
     private UUID id;
 
     @Column(nullable = false, length = 200)
@@ -64,19 +56,15 @@ public class Event {
     private EventStatus status = EventStatus.PUBLISHED;
 
     @Column(name = "organizer_id", nullable = false)
-    @Setter(AccessLevel.NONE)
     private UUID organizerId;
 
     @Version
-    @Setter(AccessLevel.NONE)
     private Long version;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Setter(AccessLevel.NONE)
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    @Setter(AccessLevel.NONE)
     private OffsetDateTime updatedAt;
 
     @PrePersist
@@ -90,6 +78,8 @@ public class Event {
     void preUpdate() {
         updatedAt = OffsetDateTime.now();
     }
+
+    protected Event() {}
 
     public Event(String title, String description, String category, String venue,
                  String imageUrl, OffsetDateTime startTime, OffsetDateTime endTime,
@@ -106,6 +96,23 @@ public class Event {
         this.organizerId = organizerId;
     }
 
+    public UUID getId() { return id; }
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public String getCategory() { return category; }
+    public String getVenue() { return venue; }
+    public String getImageUrl() { return imageUrl; }
+    public OffsetDateTime getStartTime() { return startTime; }
+    public OffsetDateTime getEndTime() { return endTime; }
+    public Integer getCapacity() { return capacity; }
+    public Integer getSeatsSold() { return seatsSold; }
+    public BigDecimal getPrice() { return price; }
+    public EventStatus getStatus() { return status; }
+    public UUID getOrganizerId() { return organizerId; }
+    public Long getVersion() { return version; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+
     public int getRemainingSeats() {
         return Math.max(0, capacity - seatsSold);
     }
@@ -113,4 +120,16 @@ public class Event {
     public boolean isSoldOut() {
         return seatsSold >= capacity;
     }
+
+    public void setTitle(String title) { this.title = title; }
+    public void setDescription(String description) { this.description = description; }
+    public void setCategory(String category) { this.category = category; }
+    public void setVenue(String venue) { this.venue = venue; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setStartTime(OffsetDateTime startTime) { this.startTime = startTime; }
+    public void setEndTime(OffsetDateTime endTime) { this.endTime = endTime; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+    public void setSeatsSold(Integer seatsSold) { this.seatsSold = seatsSold; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+    public void setStatus(EventStatus status) { this.status = status; }
 }
