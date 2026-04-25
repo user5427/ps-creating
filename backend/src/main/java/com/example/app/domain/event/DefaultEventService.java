@@ -5,9 +5,11 @@ import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import com.example.app.aspect.Audited;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,30 +61,11 @@ public class DefaultEventService implements EventService {
     @Audited("event.update")
     public EventResponse update(UUID id, UpdateEventRequest request, UUID actorId) {
         Event event = requireEvent(id);
-
-        if (!event.getOrganizerId().equals(actorId)) {
-            throw new EventAccessDeniedException(
-                    "Only the organizer of this event can edit it");
-        }
-
-        // Force the expected @Version onto the managed entity so Hibernate
-        // raises ObjectOptimisticLockingFailureException on a stale write.
-        if (!request.version().equals(event.getVersion())) {
-            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Event.class, id);
-        }
+        requireOrganizer(event, actorId);
+        requireCurrentVersion(event, request.version());
 
         OffsetDateTime previousStart = event.getStartTime();
-
-        event.setTitle(request.title());
-        event.setDescription(request.description());
-        event.setCategory(request.category());
-        event.setVenue(request.venue());
-        event.setImageUrl(request.imageUrl());
-        event.setStartTime(request.startTime());
-        event.setEndTime(request.endTime());
-        event.setCapacity(request.capacity());
-        event.setPrice(request.price());
-
+        applyUpdate(event, request);
         Event saved = eventRepository.save(event);
 
         if (!previousStart.isEqual(request.startTime()) && saved.getSeatsSold() > 0) {
@@ -97,5 +80,42 @@ public class DefaultEventService implements EventService {
     private Event requireEvent(UUID id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(id));
+    }
+
+    private static void requireOrganizer(Event event, UUID actorId) {
+        if (!event.getOrganizerId().equals(actorId)) {
+            throw new EventAccessDeniedException(
+                    "Only the organizer of this event can edit it");
+        }
+    }
+
+    /**
+     * Null-safe comparison of the client-supplied @Version against the currently
+     * persisted version. On mismatch we raise the standard Spring/JPA exception
+     * so the {@code GlobalExceptionHandler} can translate it into a 409 response
+     * identically to a natural Hibernate-detected stale write.
+     */
+    private static void requireCurrentVersion(Event event, Long expectedVersion) {
+        if (!Objects.equals(expectedVersion, event.getVersion())) {
+            throw new ObjectOptimisticLockingFailureException(Event.class, event.getId());
+        }
+    }
+
+    /**
+     * Single point where {@link UpdateEventRequest} is copied into a managed
+     * {@link Event}. Centralising the field-by-field assignment keeps the
+     * update service method short and gives us one place to revisit when new
+     * fields are added to the request DTO.
+     */
+    private static void applyUpdate(Event event, UpdateEventRequest request) {
+        event.setTitle(request.title());
+        event.setDescription(request.description());
+        event.setCategory(request.category());
+        event.setVenue(request.venue());
+        event.setImageUrl(request.imageUrl());
+        event.setStartTime(request.startTime());
+        event.setEndTime(request.endTime());
+        event.setCapacity(request.capacity());
+        event.setPrice(request.price());
     }
 }
