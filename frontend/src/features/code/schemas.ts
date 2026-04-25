@@ -1,0 +1,54 @@
+import { z } from 'zod'
+
+export const CodeUserSchema = z.object({
+  id: z.string().uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+})
+
+export const CodeEventSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  venue: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+})
+
+export const CodeResponseSchema = z.object({
+  id: z.string().uuid(),
+  scanCount: z.number().int().nonnegative(),
+  qrData: z.string(),
+  user: CodeUserSchema,
+  event: CodeEventSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export const ScanCodeResponseSchema = z.object({
+  valid: z.boolean(),
+  message: z.string(),
+  code: CodeResponseSchema.nullable(),
+})
+
+export type CodeResponse = z.infer<typeof CodeResponseSchema>
+export type ScanCodeResponse = z.infer<typeof ScanCodeResponseSchema>
+
+export const GenerateCodeFormSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .uuid('Code ID must be a valid UUID')
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  userId: z.string().trim().uuid('User ID must be a valid UUID'),
+  eventId: z.string().trim().uuid('Event ID must be a valid UUID'),
+})
+
+export type GenerateCodeFormValues = z.infer<typeof GenerateCodeFormSchema>
+
+export const ViewCodeFormSchema = z.object({
+  codeId: z.string().trim().uuid('Code ID must be a valid UUID'),
+})
+
+export type ViewCodeFormValues = z.infer<typeof ViewCodeFormSchema>

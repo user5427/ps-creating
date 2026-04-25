@@ -3,6 +3,7 @@ import { RootLayout } from './components/layout/RootLayout'
 import { EventsListPage } from './features/events/pages/EventsListPage'
 import { EventDetailPage } from './features/events/pages/EventDetailPage'
 import { EventFormPage } from './features/events/pages/EventFormPage'
+import { CodeScanPage } from './features/code/pages/CodeScanPage'
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -40,12 +41,19 @@ const eventEditRoute = createRoute({
   component: () => <EventFormPage mode="edit" />,
 })
 
+const codeScanRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/codes/scan',
+  component: CodeScanPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   eventsListRoute,
   eventCreateRoute,
   eventDetailRoute,
   eventEditRoute,
+  codeScanRoute,
 ])
 
 export const router = createRouter({ routeTree })
