@@ -2,6 +2,9 @@ package com.example.app.web;
 
 import com.example.app.api.common.ErrorResponse;
 import com.example.app.api.event.EventResponse;
+import com.example.app.domain.code.CodeAccessDeniedException;
+import com.example.app.domain.code.CodeAlreadyExistsException;
+import com.example.app.domain.code.CodeNotFoundException;
 import com.example.app.domain.event.Event;
 import com.example.app.domain.event.EventAccessDeniedException;
 import com.example.app.domain.event.EventMapper;
@@ -41,6 +44,29 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ErrorResponse.simple("FORBIDDEN", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CodeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCodeNotFound(CodeNotFoundException ex) {
+        String message = "Code %s does not exist".formatted(ex.getCodeId());
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.simple("NOT_FOUND", message));
+    }
+
+    @ExceptionHandler(CodeAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleCodeAccessDenied(CodeAccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.simple("FORBIDDEN", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CodeAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCodeExists(CodeAlreadyExistsException ex) {
+        String message = "Code %s already exists".formatted(ex.getCodeId());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.simple("CONFLICT", message));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
