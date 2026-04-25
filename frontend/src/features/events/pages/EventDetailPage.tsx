@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { format } from 'date-fns'
+import { AxiosError } from 'axios'
 import { useAppStore } from '../../../store/appStore'
 import { SoldOutChip } from '../components/SoldOutChip'
 import { useEvent } from '../hooks'
@@ -21,7 +22,7 @@ export function EventDetailPage() {
   const role = useAppStore((s) => s.role)
   const actorId = useAppStore((s) => s.actorId)
   const navigate = useNavigate()
-  const { data: event, isLoading, isError, refetch } = useEvent(eventId)
+  const { data: event, isLoading, isError, error, refetch } = useEvent(eventId)
 
   if (isLoading) {
     return (
@@ -32,17 +33,20 @@ export function EventDetailPage() {
   }
 
   if (isError || !event) {
+    const notFound = error instanceof AxiosError && error.response?.status === 404
     return (
       <Container maxWidth="md" sx={{ py: 10 }}>
         <Alert
-          severity="error"
+          severity={notFound ? 'warning' : 'error'}
           action={
-            <Button color="inherit" size="small" onClick={() => refetch()}>
-              Retry
-            </Button>
+            notFound ? undefined : (
+              <Button color="inherit" size="small" onClick={() => refetch()}>
+                Retry
+              </Button>
+            )
           }
         >
-          Event not found.
+          {notFound ? 'Event not found.' : 'Failed to load event.'}
         </Alert>
       </Container>
     )
@@ -79,7 +83,9 @@ export function EventDetailPage() {
               <Typography variant="body1">
                 <strong>{startDate}</strong> · {startTime}–{endTime}
               </Typography>
-              <Typography variant="body1">·</Typography>
+              <Typography variant="body1" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                ·
+              </Typography>
               <Typography variant="body1">{event.venue}</Typography>
             </Stack>
             <Divider sx={{ mb: 3 }} />

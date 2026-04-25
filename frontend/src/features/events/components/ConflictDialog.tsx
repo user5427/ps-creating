@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Stack,
   Table,
@@ -38,15 +37,35 @@ const LABELS: Record<string, string> = {
   price: 'Price',
 }
 
+const DATE_FIELDS = new Set(['startTime', 'endTime'])
+const PLACEHOLDER = '—'
+
+function toDateOrNull(value: unknown): Date | null {
+  if (value == null || value === '') return null
+  const d = value instanceof Date ? value : new Date(String(value))
+  return isNaN(d.getTime()) ? null : d
+}
+
 function display(field: string, value: unknown): string {
-  if (value == null || value === '') return '—'
-  if (field === 'startTime' || field === 'endTime') {
-    const d = value instanceof Date ? value : new Date(String(value))
-    return format(d, 'yyyy-MM-dd HH:mm')
+  if (DATE_FIELDS.has(field)) {
+    const d = toDateOrNull(value)
+    return d ? format(d, 'yyyy-MM-dd HH:mm') : PLACEHOLDER
   }
+  if (value == null || value === '') return PLACEHOLDER
   if (field === 'price' && typeof value === 'number') return `€${value.toFixed(2)}`
   const str = String(value)
   return str.length > 80 ? str.slice(0, 77) + '…' : str
+}
+
+/** Normalize a value into a canonical form so trivial differences don't trigger the dialog. */
+function canonical(field: string, value: unknown): unknown {
+  if (DATE_FIELDS.has(field)) {
+    const d = toDateOrNull(value)
+    return d ? d.getTime() : null
+  }
+  // Treat null / undefined / '' as equivalent for optional strings.
+  if (value == null || value === '') return null
+  return value
 }
 
 export function ConflictDialog({
@@ -58,14 +77,8 @@ export function ConflictDialog({
   onClose,
 }: Props) {
   const fields = Object.keys(LABELS).filter((field) => {
-    const server = field === 'startTime' || field === 'endTime'
-      ? new Date((current as Record<string, unknown>)[field] as string).getTime()
-      : (current as Record<string, unknown>)[field]
-    const local = field === 'startTime' || field === 'endTime'
-      ? localValues[field] instanceof Date
-        ? (localValues[field] as Date).getTime()
-        : new Date(String(localValues[field])).getTime()
-      : localValues[field]
+    const server = canonical(field, (current as Record<string, unknown>)[field])
+    const local = canonical(field, localValues[field])
     return server !== local
   })
 
@@ -74,13 +87,10 @@ export function ConflictDialog({
       <DialogTitle>Someone else edited this event</DialogTitle>
       <DialogContent>
         <Alert severity="warning" sx={{ mb: 2 }}>
-          The event was changed on the server while you were editing. Review
-          the differences below and choose how to proceed.
+          This event was updated after you started editing it. Compare your
+          changes with the current server values, then refresh or overwrite as
+          needed.
         </Alert>
-        <DialogContentText sx={{ mb: 2 }}>
-          <strong>Quality requirement #4:</strong> optimistic locking detected a
-          version mismatch (@Version bumped server-side).
-        </DialogContentText>
         {fields.length === 0 ? (
           <Typography variant="body2">
             No visible differences — likely a field we don't render here changed.
