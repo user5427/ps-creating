@@ -36,7 +36,7 @@ export function Footer() {
           </Stack>
         </Stack>
         <Typography variant="body2" sx={{ mt: 6, color: 'text.secondary' }}>
-          © 2026 PSK team · VU MIF · Coursework project
+          © {new Date().getFullYear()} PSK team · VU MIF · Coursework project
         </Typography>
       </Container>
     </Box>

@@ -1,7 +1,8 @@
-import { Box, Card, CardActionArea, Chip, Stack, Typography } from '@mui/material'
+import { Box, Card, CardActionArea, Stack, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import type { EventResponse } from '../schemas'
+import { SoldOutChip } from './SoldOutChip'
 
 interface Props {
   event: EventResponse
@@ -30,17 +31,7 @@ export function EventCard({ event }: Props) {
           }}
         >
           {event.soldOut && (
-            <Chip
-              label="Sold out"
-              size="small"
-              sx={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                backgroundColor: '#1A1A1A',
-                color: '#FFFFFF',
-              }}
-            />
+            <SoldOutChip sx={{ position: 'absolute', top: 12, left: 12 }} />
           )}
         </Box>
         <Box sx={{ p: 2.5 }}>

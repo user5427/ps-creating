@@ -13,7 +13,7 @@ export const EventResponseSchema = z.object({
   seatsSold: z.number().int().nonnegative(),
   remainingSeats: z.number().int().nonnegative(),
   soldOut: z.boolean(),
-  price: z.union([z.string(), z.number()]).transform((v) => Number(v)),
+  price: z.coerce.number().finite().nonnegative(),
   status: z.string(),
   organizerId: z.string().uuid(),
   version: z.number().int().nonnegative(),

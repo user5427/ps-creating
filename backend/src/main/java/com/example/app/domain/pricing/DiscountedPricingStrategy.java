@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * Promotional strategy: applies a flat discount to every event.
- * Active when {@code SPRING_PROFILES_ACTIVE=dev,promo}.
+ * Active whenever the {@code promo} profile is enabled
+ * (for example, {@code SPRING_PROFILES_ACTIVE=dev,promo}).
  */
 @Component
 @Profile("promo")
