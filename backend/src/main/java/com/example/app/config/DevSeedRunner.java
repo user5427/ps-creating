@@ -6,6 +6,8 @@ import com.example.app.domain.event.EventStatus;
 import com.example.app.domain.user.Role;
 import com.example.app.domain.user.User;
 import com.example.app.domain.user.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -35,6 +37,9 @@ public class DevSeedRunner implements CommandLineRunner {
     private final UUID organizerId;
     private final UUID attendeeId;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public DevSeedRunner(UserRepository userRepository,
                          EventRepository eventRepository,
                          @Value("${app.dev.organizer-id}") UUID organizerId,
@@ -53,12 +58,15 @@ public class DevSeedRunner implements CommandLineRunner {
     }
 
     private void seedUsers() {
+        // Use EntityManager.persist() directly: with a pre-assigned UUID,
+        // Spring Data's save() would call merge() and then choke because the
+        // @Version field is null on a "detached-looking" entity.
         if (userRepository.findById(organizerId).isEmpty()) {
-            userRepository.save(new User(organizerId, "organizer@demo.test", "Tomas", "Žilinskas", Role.ORGANIZER));
+            entityManager.persist(new User(organizerId, "organizer@demo.test", "Tomas", "Žilinskas", Role.ORGANIZER));
             log.info("Seeded organizer {}", organizerId);
         }
         if (userRepository.findById(attendeeId).isEmpty()) {
-            userRepository.save(new User(attendeeId, "attendee@demo.test", "Eglė", "Kazlauskaitė", Role.ATTENDEE));
+            entityManager.persist(new User(attendeeId, "attendee@demo.test", "Eglė", "Kazlauskaitė", Role.ATTENDEE));
             log.info("Seeded attendee {}", attendeeId);
         }
     }
