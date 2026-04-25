@@ -29,9 +29,11 @@ export function TopNav() {
           <Button component={Link} to="/events" color="inherit" sx={{ color: 'text.primary' }}>
             Events
           </Button>
-          <Button component={Link} to="/codes/scan" color="inherit" sx={{ color: 'text.primary' }}>
-            Scan QR code
-          </Button>
+          {role === 'ORGANIZER' && (
+            <Button component={Link} to="/codes/scan" color="inherit" sx={{ color: 'text.primary' }}>
+              Scan QR code
+            </Button>
+          )}
           {role === 'ORGANIZER' && (
             <Button
               component={Link}
