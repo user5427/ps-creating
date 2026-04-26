@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   Alert,
   Box,
@@ -8,6 +9,7 @@ import {
   Divider,
   Grid,
   Stack,
+  TextField,
   Typography,
 } from '@mui/material'
 import { useNavigate, useParams } from '@tanstack/react-router'
@@ -23,6 +25,7 @@ export function EventDetailPage() {
   const actorId = useAppStore((s) => s.actorId)
   const navigate = useNavigate()
   const { data: event, isLoading, isError, error, refetch } = useEvent(eventId)
+  const [quantity, setQuantity] = useState(1)
 
   if (isLoading) {
     return (
@@ -56,6 +59,8 @@ export function EventDetailPage() {
   const startTime = format(new Date(event.startTime), 'HH:mm')
   const endTime = format(new Date(event.endTime), 'HH:mm')
   const isOwner = role === 'ORGANIZER' && event.organizerId === actorId
+  const maxSelectableTickets = Math.max(event.remainingSeats, 1)
+  const boundedQuantity = Math.min(Math.max(quantity, 1), maxSelectableTickets)
 
   return (
     <>
@@ -117,11 +122,33 @@ export function EventDetailPage() {
                   : `${event.remainingSeats} of ${event.capacity} seats remaining`}
               </Typography>
               <Stack spacing={1.5}>
+                <TextField
+                  label="Quantity"
+                  type="number"
+                  value={boundedQuantity}
+                  onChange={(e) => {
+                    const parsed = Number(e.target.value)
+                    if (!Number.isFinite(parsed)) return
+                    const clamped = Math.min(Math.max(Math.trunc(parsed), 1), maxSelectableTickets)
+                    setQuantity(clamped)
+                  }}
+                  disabled={event.soldOut}
+                  fullWidth
+                  size="small"
+                  inputProps={{ min: 1, max: maxSelectableTickets, step: 1 }}
+                />
                 <Button
                   variant="contained"
                   size="large"
                   fullWidth
                   disabled={event.soldOut}
+                  onClick={() =>
+                    navigate({
+                      to: '/events/$eventId/checkout',
+                      params: { eventId },
+                      search: { quantity: boundedQuantity },
+                    })
+                  }
                 >
                   {event.soldOut ? 'Sold out' : 'Purchase ticket'}
                 </Button>
@@ -130,7 +157,7 @@ export function EventDetailPage() {
                     onClick={() =>
                       navigate({
                         to: '/events/$eventId/edit',
-                        params: { eventId: event.id },
+                        params: { eventId },
                       })
                     }
                     variant="outlined"
