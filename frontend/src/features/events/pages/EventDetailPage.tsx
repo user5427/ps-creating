@@ -58,6 +58,7 @@ export function EventDetailPage() {
   const startDate = format(new Date(event.startTime), 'EEEE, MMMM d, yyyy')
   const startTime = format(new Date(event.startTime), 'HH:mm')
   const endTime = format(new Date(event.endTime), 'HH:mm')
+  const isOrganizer = role === 'ORGANIZER'
   const isOwner = role === 'ORGANIZER' && event.organizerId === actorId
   const maxSelectableTickets = Math.max(event.remainingSeats, 1)
   const boundedQuantity = Math.min(Math.max(quantity, 1), maxSelectableTickets)
@@ -137,21 +138,21 @@ export function EventDetailPage() {
                   size="small"
                   inputProps={{ min: 1, max: maxSelectableTickets, step: 1 }}
                 />
-                <Button
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  disabled={event.soldOut}
-                  onClick={() =>
-                    navigate({
-                      to: '/events/$eventId/checkout',
-                      params: { eventId },
-                      search: { quantity: boundedQuantity },
-                    })
-                  }
-                >
-                  {event.soldOut ? 'Sold out' : 'Purchase ticket'}
-                </Button>
+                  {!isOrganizer && <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      disabled={event.soldOut}
+                      onClick={() =>
+                          navigate({
+                              to: '/events/$eventId/checkout',
+                              params: {eventId},
+                              search: {quantity: boundedQuantity},
+                          })
+                      }
+                  >
+                      {event.soldOut ? 'Sold out' : 'Purchase ticket'}
+                  </Button>}
                 {isOwner && (
                   <Button
                     onClick={() =>
