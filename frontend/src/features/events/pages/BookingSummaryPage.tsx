@@ -181,7 +181,7 @@ export function BookingSummaryPage() {
                         onClick={() => void handleStartCheckout()}
                         disabled={event.soldOut || quantity < 1 || createPaymentIntent.isPending}
                     >
-                      {createPaymentIntent.isPending ? 'Preparing checkout...' : 'Confirm and continue'}
+                      {createPaymentIntent.isPending ? 'Preparing checkout...' : 'Confirm'}
                     </Button>
                 )}
 
@@ -208,7 +208,7 @@ export function BookingSummaryPage() {
                     </Elements>
                 )}
 
-                {fulfilled && <Alert severity="success" sx={{ mt: 2 }}>Payment received!</Alert>}
+                {fulfilled && <Alert severity="success" sx={{ mt: 2 }}>Payment Successful!</Alert>}
                 {failed && (
                     <Alert severity="error" sx={{ mt: 2 }}>
                       {paymentStatus.data?.errorMessage ?? 'Payment failed. Please retry.'}

@@ -8,6 +8,7 @@ import com.example.app.domain.code.CodeRepository;
 import com.example.app.domain.event.Event;
 import com.example.app.domain.event.EventNotFoundException;
 import com.example.app.domain.event.EventRepository;
+import com.example.app.domain.event.EventServiceDecorator;
 import com.example.app.domain.pricing.PricingStrategy;
 import com.example.app.domain.user.User;
 import com.example.app.domain.user.UserRepository;
@@ -33,17 +34,20 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
     private final UserRepository userRepository;
     private final CodeRepository codeRepository;
     private final PricingStrategy pricingStrategy;
+    private final EventServiceDecorator eventServiceDecorator;
 
     public DefaultCheckoutPaymentService(CheckoutPaymentRepository checkoutPaymentRepository,
                                          EventRepository eventRepository,
                                          UserRepository userRepository,
                                          CodeRepository codeRepository,
-                                         PricingStrategy pricingStrategy) {
+                                         PricingStrategy pricingStrategy,
+                                         EventServiceDecorator eventServiceDecorator) {
         this.checkoutPaymentRepository = checkoutPaymentRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.codeRepository = codeRepository;
         this.pricingStrategy = pricingStrategy;
+        this.eventServiceDecorator = eventServiceDecorator;
     }
 
     @Override
@@ -126,7 +130,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
 
         event.setSeatsSold(event.getSeatsSold() + quantity);
         eventRepository.save(event);
-
+        eventServiceDecorator.invalidateListCache();
         return new ClaimFreeTicketsResponse(eventId, quantity);
     }
 
@@ -182,6 +186,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
                     payment.markPaymentSucceeded();
                     payment.markFulfilled();
                     checkoutPaymentRepository.save(payment);
+                    eventServiceDecorator.invalidateListCache();
                 });
     }
 
