@@ -144,7 +144,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
 
                     List<Code> createdCodes = new ArrayList<>();
                     for (int i = 0; i < payment.getQuantity(); i++) {
-                        createdCodes.add(new Code(UUID.randomUUID(), attendee, event));
+                        createdCodes.add(new Code(UUID.randomUUID(), attendee, event, payment.getId()));
                     }
                     codeRepository.saveAll(createdCodes);
 
@@ -176,4 +176,3 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
                 .longValueExact();
     }
 }
-
