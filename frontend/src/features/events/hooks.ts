@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  createCheckoutPaymentIntent,
   createEvent,
+  fetchCheckoutPaymentStatus,
   fetchEvent,
   fetchEvents,
   updateEvent,
+  type CreateCheckoutPaymentIntentPayload,
   type CreateEventPayload,
   type UpdateEventPayload,
 } from './api'
@@ -40,6 +43,25 @@ export function useUpdateEvent(id: string) {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['events'] })
       qc.setQueryData(['events', id], data)
+    },
+  })
+}
+
+export function useCreateCheckoutPaymentIntent(eventId: string) {
+  return useMutation({
+    mutationFn: (payload: CreateCheckoutPaymentIntentPayload) =>
+      createCheckoutPaymentIntent(eventId, payload),
+  })
+}
+
+export function useCheckoutPaymentStatus(paymentIntentId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['checkout-payment-status', paymentIntentId],
+    queryFn: () => fetchCheckoutPaymentStatus(paymentIntentId!),
+    enabled: enabled && !!paymentIntentId,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status
+      return status === 'INITIATED' || status === 'PAYMENT_SUCCEEDED' ? 1500 : false
     },
   })
 }
