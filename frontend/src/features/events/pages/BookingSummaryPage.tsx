@@ -169,7 +169,7 @@ export function BookingSummaryPage() {
                         onClick={() => void handleClaimFree()}
                         disabled={event.soldOut || quantity < 1 || claimFreeTickets.isPending}
                     >
-                      {claimFreeTickets.isPending ? 'Claiming...' : 'Claim for free'}
+                      {claimFreeTickets.isPending ? 'Claiming...' : 'Confirm'}
                     </Button>
                 ) : <Alert severity="success">Ticket(s) claimed.</Alert>}
               </Stack>

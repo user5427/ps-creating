@@ -151,7 +151,9 @@ export function EventDetailPage() {
                           })
                       }
                   >
-                      {event.soldOut ? 'Sold out' : 'Purchase ticket'}
+                      {event.soldOut ? 'Sold out' :
+                          event.price === 0 ? 'Claim for free'
+                              : 'Purchase ticket'}
                   </Button>}
                 {isOwner && (
                   <Button
