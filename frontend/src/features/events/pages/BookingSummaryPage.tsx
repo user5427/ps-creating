@@ -218,12 +218,6 @@ export function BookingSummaryPage() {
         </Alert>
       )}
 
-      {isFreeEvent && freeClaimedTickets !== null && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          Ticket(s) claimed: {freeClaimedTickets}.
-        </Alert>
-      )}
-
       {checkoutError && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {checkoutError}
