@@ -1,11 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  claimFreeTickets,
   createCheckoutPaymentIntent,
   createEvent,
   fetchCheckoutPaymentStatus,
   fetchEvent,
   fetchEvents,
   updateEvent,
+  type ClaimFreeTicketsPayload,
   type CreateCheckoutPaymentIntentPayload,
   type CreateEventPayload,
   type UpdateEventPayload,
@@ -62,6 +64,17 @@ export function useCheckoutPaymentStatus(paymentIntentId: string | null, enabled
     refetchInterval: (query) => {
       const status = query.state.data?.status
       return status === 'INITIATED' || status === 'PAYMENT_SUCCEEDED' ? 1500 : false
+    },
+  })
+}
+
+export function useClaimFreeTickets() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: ClaimFreeTicketsPayload) => claimFreeTickets(payload),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['events'] })
+      qc.invalidateQueries({ queryKey: ['events', variables.eventId] })
     },
   })
 }

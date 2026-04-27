@@ -97,3 +97,10 @@ export const CheckoutPaymentStatusResponseSchema = z.object({
 })
 
 export type CheckoutPaymentStatusResponse = z.infer<typeof CheckoutPaymentStatusResponseSchema>
+
+export const ClaimFreeTicketsResponseSchema = z.object({
+  eventId: z.string().uuid(),
+  claimedTickets: z.number().int().positive(),
+})
+
+export type ClaimFreeTicketsResponse = z.infer<typeof ClaimFreeTicketsResponseSchema>

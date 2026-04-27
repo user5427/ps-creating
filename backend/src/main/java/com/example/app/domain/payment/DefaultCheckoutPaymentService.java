@@ -1,5 +1,6 @@
 package com.example.app.domain.payment;
 
+import com.example.app.api.payment.ClaimFreeTicketsResponse;
 import com.example.app.api.payment.CheckoutPaymentStatusResponse;
 import com.example.app.api.payment.CreateCheckoutPaymentIntentResponse;
 import com.example.app.domain.code.Code;
@@ -103,6 +104,33 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
     }
 
     @Override
+    public ClaimFreeTicketsResponse claimFreeTickets(UUID eventId, UUID attendeeId, int quantity) {
+        Event event = eventRepository.findByIdForUpdate(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+
+        if (pricingStrategy.displayPrice(event).compareTo(BigDecimal.ZERO) != 0) {
+            throw new IllegalStateException("Only free tickets can be claimed through this endpoint");
+        }
+
+        if (quantity > event.getRemainingSeats()) {
+            throw new IllegalStateException("Not enough remaining seats for this claim");
+        }
+
+        User attendee = userRepository.findById(attendeeId)
+                .orElseThrow(() -> new CheckoutAccessDeniedException("Attendee does not exist: " + attendeeId));
+        List<Code> createdCodes = new ArrayList<>();
+        for (int i = 0; i < quantity; i++) {
+            createdCodes.add(new Code(UUID.randomUUID(), attendee, event, null));
+        }
+        codeRepository.saveAll(createdCodes);
+
+        event.setSeatsSold(event.getSeatsSold() + quantity);
+        eventRepository.save(event);
+
+        return new ClaimFreeTicketsResponse(eventId, quantity);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public CheckoutPaymentStatusResponse status(String paymentIntentId, UUID actorId, boolean actorIsOrganizer) {
         CheckoutPayment payment = checkoutPaymentRepository.findByPaymentIntentId(paymentIntentId)
@@ -176,3 +204,4 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
                 .longValueExact();
     }
 }
+

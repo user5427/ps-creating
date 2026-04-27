@@ -17,6 +17,7 @@ import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-
 import { loadStripe, type StripeError } from '@stripe/stripe-js'
 import {
   useCheckoutPaymentStatus,
+  useClaimFreeTickets,
   useCreateCheckoutPaymentIntent,
   useEvent,
 } from '../hooks'
@@ -88,9 +89,11 @@ export function BookingSummaryPage() {
   const { data: event, isLoading, isError, error, refetch } = useEvent(eventId)
 
   const createPaymentIntent = useCreateCheckoutPaymentIntent(eventId)
+  const claimFreeTickets = useClaimFreeTickets()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [freeClaimedTickets, setFreeClaimedTickets] = useState<number | null>(null)
   const [checkoutStarted, setCheckoutStarted] = useState(false)
   const [shouldPollStatus, setShouldPollStatus] = useState(false)
 
@@ -128,6 +131,24 @@ export function BookingSummaryPage() {
       setClientSecret(null)
       setPaymentIntentId(null)
       setCheckoutStarted(false)
+    }
+  }
+
+  const handleClaimFree = async () => {
+    if (!event || !isFreeEvent || event.soldOut || quantity < 1) {
+      return
+    }
+
+    setCheckoutError(null)
+    try {
+      const response = await claimFreeTickets.mutateAsync({
+        eventId: event.id,
+        quantity,
+      })
+      setFreeClaimedTickets(response.claimedTickets)
+    } catch {
+      setCheckoutError('Failed to claim free ticket(s). Please try again.')
+      setFreeClaimedTickets(null)
     }
   }
 
@@ -197,9 +218,9 @@ export function BookingSummaryPage() {
         </Alert>
       )}
 
-      {failed && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {paymentStatus.data?.errorMessage ?? 'Payment failed. Please retry with a different card.'}
+      {isFreeEvent && freeClaimedTickets !== null && (
+        <Alert severity="success" sx={{ mb: 3 }}>
+          Ticket(s) claimed: {freeClaimedTickets}.
         </Alert>
       )}
 
@@ -264,7 +285,21 @@ export function BookingSummaryPage() {
 
       <Box sx={{ mt: 3 }}>
         {isFreeEvent && (
-          <Alert severity="info">This event is free. Card checkout is only required for paid tickets.</Alert>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            {freeClaimedTickets === null ? (
+              <Button
+                variant="contained"
+                size="large"
+                onClick={() => void handleClaimFree()}
+                disabled={event.soldOut || quantity < 1 || claimFreeTickets.isPending}
+                fullWidth
+              >
+                {claimFreeTickets.isPending ? 'Claiming...' : 'Claim for free'}
+              </Button>
+            ) : (
+              <Alert severity="success">Ticket(s) claimed.</Alert>
+            )}
+          </Stack>
         )}
 
         {!isFreeEvent && !checkoutStarted && (

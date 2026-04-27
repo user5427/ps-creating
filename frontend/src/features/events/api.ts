@@ -1,10 +1,12 @@
 import apiClient from '../../api/client'
 import {
   CheckoutPaymentStatusResponseSchema,
+  ClaimFreeTicketsResponseSchema,
   CreateCheckoutPaymentIntentResponseSchema,
   EventResponseSchema,
   PageSchema,
   type CheckoutPaymentStatusResponse,
+  type ClaimFreeTicketsResponse,
   type CreateCheckoutPaymentIntentResponse,
   type EventResponse,
   type Page,
@@ -27,6 +29,11 @@ export interface UpdateEventPayload extends CreateEventPayload {
 }
 
 export interface CreateCheckoutPaymentIntentPayload {
+  quantity: number
+}
+
+export interface ClaimFreeTicketsPayload {
+  eventId: string
   quantity: number
 }
 
@@ -71,4 +78,11 @@ export async function fetchCheckoutPaymentStatus(
     `/checkout/payment-intents/${paymentIntentId}`,
   )
   return CheckoutPaymentStatusResponseSchema.parse(data)
+}
+
+export async function claimFreeTickets(
+  payload: ClaimFreeTicketsPayload,
+): Promise<ClaimFreeTicketsResponse> {
+  const { data } = await apiClient.post('/tickets/claim-free', payload)
+  return ClaimFreeTicketsResponseSchema.parse(data)
 }

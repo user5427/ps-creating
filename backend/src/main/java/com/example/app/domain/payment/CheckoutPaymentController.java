@@ -1,5 +1,7 @@
 package com.example.app.domain.payment;
 
+import com.example.app.api.payment.ClaimFreeTicketsRequest;
+import com.example.app.api.payment.ClaimFreeTicketsResponse;
 import com.example.app.api.payment.CheckoutPaymentStatusResponse;
 import com.example.app.api.payment.CreateCheckoutPaymentIntentRequest;
 import com.example.app.api.payment.CreateCheckoutPaymentIntentResponse;
@@ -32,6 +34,15 @@ public class CheckoutPaymentController {
         return checkoutPaymentService.createPaymentIntent(eventId, actorContext.getActorId(), request.quantity());
     }
 
+    @PostMapping("/tickets/claim-free")
+    public ClaimFreeTicketsResponse claimFree(@Valid @RequestBody ClaimFreeTicketsRequest request) {
+        requireAttendee();
+        return checkoutPaymentService.claimFreeTickets(
+                request.eventId(),
+                actorContext.getActorId(),
+                request.quantity());
+    }
+
     @GetMapping("/checkout/payment-intents/{paymentIntentId}")
     public CheckoutPaymentStatusResponse status(@PathVariable String paymentIntentId) {
         return checkoutPaymentService.status(paymentIntentId, actorContext.getActorId(), actorContext.isOrganizer());
@@ -43,4 +54,3 @@ public class CheckoutPaymentController {
         }
     }
 }
-
