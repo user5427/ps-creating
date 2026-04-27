@@ -7,7 +7,7 @@
 
     * **`STRIPE_API_KEY`** (secret)
     * **`VITE_STRIPE_PUBLISHABLE_KEY`** (public)
-* Save the secret in the backend's `.env`, while the public key goes in the frontend's `.env.local`.
+* Save the secret in the backend's env, while the public key goes in the frontend's `.env.local`.
 
 ---
 
@@ -39,7 +39,7 @@ stripe listen --forward-to localhost:8080/api/webhooks/stripe
 * After starting the listener, Stripe will output a **webhook signing secret**.
 * Save this value as:
 
-    * **`STRIPE_WEBHOOK_SECRET`** in your backend's `.env` file.
+    * **`STRIPE_WEBHOOK_SECRET`** in your backend's env.
 
 Once this is set up, Stripe payment events will be forwarded to the local backend and the webhook will create tickets after successful payments.
 
