@@ -7,13 +7,13 @@
 
     * **`STRIPE_API_KEY`** (secret)
     * **`VITE_STRIPE_PUBLISHABLE_KEY`** (public)
-* Save secret in the backend's `.env`, while public in the frontend's one.
+* Save the secret in the backend's `.env`, while the public key goes in the frontend's `.env.local`.
 
 ---
 
 ### 2. Configure Webhooks for Local Development
 
-Our backend uses **Stripe webhooks**, which means Stripe must be able to reach local server.
+Our backend uses **Stripe webhooks**, which means Stripe must be able to reach the local server.
 
 To enable this locally, use the **Stripe CLI**.
 
