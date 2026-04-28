@@ -12,11 +12,11 @@ import com.example.app.domain.user.Role;
 import com.example.app.domain.user.User;
 import com.example.app.domain.user.UserRepository;
 import com.example.app.service.StripeService;
-import com.example.app.service.TicketEmailService;
 import com.example.app.util.CodeQrUtils;
 import com.stripe.model.PaymentIntent;
 import java.util.Objects;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +30,8 @@ public class DefaultCodeService implements CodeService {
     private final EventRepository eventRepository;
     private final CodeMapper codeMapper;
     private final CodeQrUtils codeQrUtils;
+    private final ApplicationEventPublisher eventPublisher;
     private final StripeService stripeService;
-    private final TicketEmailService ticketEmailService;
     private final boolean fakePaymentsEnabled;
 
     public DefaultCodeService(CodeRepository codeRepository,
@@ -39,16 +39,16 @@ public class DefaultCodeService implements CodeService {
                               EventRepository eventRepository,
                               CodeMapper codeMapper,
                               CodeQrUtils codeQrUtils,
+                              ApplicationEventPublisher eventPublisher,
                               StripeService stripeService,
-                              TicketEmailService ticketEmailService,
                               @Value("${app.dev.fake-payments-enabled:true}") boolean fakePaymentsEnabled) {
         this.codeRepository = codeRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.codeMapper = codeMapper;
         this.codeQrUtils = codeQrUtils;
+        this.eventPublisher = eventPublisher;
         this.stripeService = stripeService;
-        this.ticketEmailService = ticketEmailService;
         this.fakePaymentsEnabled = fakePaymentsEnabled;
     }
 
@@ -84,7 +84,14 @@ public class DefaultCodeService implements CodeService {
         Code saved = codeRepository.save(code);
 
         String qrPayload = codeQrUtils.createPayload(saved.getId());
-        ticketEmailService.sendTicketConfirmation(user, event, saved.getId(), qrPayload);
+        eventPublisher.publishEvent(new TicketPurchaseConfirmedEvent(
+            user.getEmail(),
+            user.getFirstName(),
+            event.getTitle(),
+            event.getVenue(),
+            event.getStartTime(),
+            saved.getId(),
+            qrPayload));
 
         return codeMapper.toResponse(saved, qrPayload);
     }
