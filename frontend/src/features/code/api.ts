@@ -11,6 +11,11 @@ export interface ScanCodePayload {
   qrData: string
 }
 
+export interface ConfirmPurchasePayload {
+  eventId: string
+  paymentIntentId: string
+}
+
 export async function generateCode(payload: GenerateCodePayload): Promise<CodeResponse> {
   const { data } = await apiClient.post('/codes/generate', payload)
   return CodeResponseSchema.parse(data)
@@ -19,6 +24,11 @@ export async function generateCode(payload: GenerateCodePayload): Promise<CodeRe
 export async function scanCode(payload: ScanCodePayload): Promise<ScanCodeResponse> {
   const { data } = await apiClient.post('/codes/scan', payload)
   return ScanCodeResponseSchema.parse(data)
+}
+
+export async function confirmPurchase(payload: ConfirmPurchasePayload): Promise<CodeResponse> {
+  const { data } = await apiClient.post('/codes/confirm-purchase', payload)
+  return CodeResponseSchema.parse(data)
 }
 
 export async function viewCode(codeId: string): Promise<CodeResponse> {
