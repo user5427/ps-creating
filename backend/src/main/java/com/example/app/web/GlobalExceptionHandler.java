@@ -11,6 +11,7 @@ import com.example.app.domain.event.EventAccessDeniedException;
 import com.example.app.domain.event.EventMapper;
 import com.example.app.domain.event.EventNotFoundException;
 import com.example.app.domain.event.EventRepository;
+import com.example.app.domain.payment.CheckoutAccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -108,5 +109,26 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.conflict(
                         "Event was modified by someone else. Refresh to see the current version.",
                         current));
+    }
+
+    @ExceptionHandler(CheckoutAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleCheckoutAccessDenied(CheckoutAccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ErrorResponse.simple("FORBIDDEN", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.simple("BAD_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.simple("CONFLICT", ex.getMessage()));
     }
 }

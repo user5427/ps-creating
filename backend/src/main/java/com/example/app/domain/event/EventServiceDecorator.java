@@ -61,15 +61,20 @@ public class EventServiceDecorator implements EventService {
     @Override
     public EventResponse create(CreateEventRequest request, UUID organizerId) {
         EventResponse created = delegate.create(request, organizerId);
-        listCache.clear();
+        invalidateListCache();
         return created;
     }
 
     @Override
     public EventResponse update(UUID id, UpdateEventRequest request, UUID actorId) {
         EventResponse updated = delegate.update(id, request, actorId);
-        listCache.clear();
+        invalidateListCache();
         return updated;
+    }
+
+    public void invalidateListCache() {
+        log.debug("EventServiceDecorator list cache invalidated");
+        listCache.clear();
     }
 
     private record CacheEntry(Page<EventResponse> page, Instant expiresAt) {}

@@ -76,3 +76,31 @@ export const ValidationErrorSchema = z.object({
   message: z.string(),
   fieldErrors: z.record(z.string()),
 })
+
+export const CreateCheckoutPaymentIntentResponseSchema = z.object({
+  paymentIntentId: z.string(),
+  clientSecret: z.string(),
+  amount: z.number().int().nonnegative(),
+  currency: z.string().length(3),
+  quantity: z.number().int().positive(),
+})
+
+export type CreateCheckoutPaymentIntentResponse = z.infer<
+  typeof CreateCheckoutPaymentIntentResponseSchema
+>
+
+export const CheckoutPaymentStatusResponseSchema = z.object({
+  paymentIntentId: z.string(),
+  status: z.enum(['INITIATED', 'PAYMENT_SUCCEEDED', 'FAILED', 'FULFILLED']),
+  errorMessage: z.string().nullable(),
+  fulfilledTickets: z.number().int().nonnegative(),
+})
+
+export type CheckoutPaymentStatusResponse = z.infer<typeof CheckoutPaymentStatusResponseSchema>
+
+export const ClaimFreeTicketsResponseSchema = z.object({
+  eventId: z.string().uuid(),
+  claimedTickets: z.number().int().positive(),
+})
+
+export type ClaimFreeTicketsResponse = z.infer<typeof ClaimFreeTicketsResponseSchema>

@@ -4,7 +4,7 @@
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and configure:
+(NOTE: .env doesn't seem to work, just set env variables in run config) Copy `.env.example` to `.env` and configure:
 
 Required variables:
 - `TWILIO_ACCOUNT_SID` - Get from [Twilio Console](https://console.twilio.com)
