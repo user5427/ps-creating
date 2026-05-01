@@ -1,5 +1,13 @@
 import { useMutation } from '@tanstack/react-query'
-import { generateCode, scanCode, viewCode, type GenerateCodePayload, type ScanCodePayload } from './api'
+import {
+  confirmPurchase,
+  generateCode,
+  scanCode,
+  viewCode,
+  type ConfirmPurchasePayload,
+  type GenerateCodePayload,
+  type ScanCodePayload,
+} from './api'
 
 export function useGenerateCode() {
   return useMutation({
@@ -10,6 +18,12 @@ export function useGenerateCode() {
 export function useScanCode() {
   return useMutation({
     mutationFn: (payload: ScanCodePayload) => scanCode(payload),
+  })
+}
+
+export function useConfirmPurchase() {
+  return useMutation({
+    mutationFn: (payload: ConfirmPurchasePayload) => confirmPurchase(payload),
   })
 }
 
