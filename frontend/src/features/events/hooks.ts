@@ -75,6 +75,7 @@ export function useClaimFreeTickets() {
     onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: ['events'] })
       qc.invalidateQueries({ queryKey: ['events', variables.eventId] })
+      qc.invalidateQueries({ queryKey: ['my-tickets'] })
     },
   })
 }
