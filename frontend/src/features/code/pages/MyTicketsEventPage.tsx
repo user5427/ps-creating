@@ -62,18 +62,32 @@ export function MyTicketsEventPage() {
           <>
             <Typography variant="h5">{data.event.title}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              {format(new Date(data.event.startTime), 'EEEE, d MMM yyyy, HH:mm')} - {data.event.venue}
+              {format(new Date(data.event.startTime), 'EEEE, d MMM yyyy, HH:mm')} to{' '}
+              {format(new Date(data.event.endTime), 'HH:mm')} - {data.event.venue}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               {data.tickets.totalElements} ticket(s)
             </Typography>
 
             <Stack spacing={2}>
-              {data.tickets.content.map((ticket) => (
+              {data.tickets.content.map((ticket, index) => (
                 <Card key={ticket.qrData} variant="outlined">
                   <CardContent>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center" justifyContent="space-between">
                       <QRCodeSVG value={ticket.qrData} size={180} marginSize={4} />
+                      <Stack spacing={1} sx={{ flex: 1 }}>
+                        <Box>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            Ticket #{(page * PAGE_SIZE) + index + 1}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {ticket.qrData.substring(0, 12)}...
+                          </Typography>
+                        </Box>
+                        <Typography variant="caption" color="text.secondary">
+                          Scanned: {ticket.scanCount}
+                        </Typography>
+                      </Stack>
                       <Button variant="contained" onClick={() => setFullscreenQr(ticket.qrData)}>
                         Full screen
                       </Button>
