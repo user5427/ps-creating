@@ -3,7 +3,14 @@ import { RootLayout } from './components/layout/RootLayout'
 import { EventsListPage } from './features/events/pages/EventsListPage'
 import { EventDetailPage } from './features/events/pages/EventDetailPage'
 import { EventFormPage } from './features/events/pages/EventFormPage'
+import { BookingSummaryPage } from './features/events/pages/BookingSummaryPage'
 import { CodeScanPage } from './features/code/pages/CodeScanPage'
+
+function parseCheckoutSearch(search: Record<string, unknown>) {
+  const quantityValue = Number(search.quantity)
+  const quantity = Number.isInteger(quantityValue) && quantityValue > 0 ? quantityValue : 1
+  return { quantity }
+}
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -35,6 +42,13 @@ const eventDetailRoute = createRoute({
   component: EventDetailPage,
 })
 
+const eventCheckoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/events/$eventId/checkout',
+  validateSearch: parseCheckoutSearch,
+  component: BookingSummaryPage,
+})
+
 const eventEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/$eventId/edit',
@@ -52,6 +66,7 @@ const routeTree = rootRoute.addChildren([
   eventsListRoute,
   eventCreateRoute,
   eventDetailRoute,
+  eventCheckoutRoute,
   eventEditRoute,
   codeScanRoute,
 ])
