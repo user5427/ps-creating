@@ -3,6 +3,8 @@ import { RootLayout } from './components/layout/RootLayout'
 import { EventsListPage } from './features/events/pages/EventsListPage'
 import { EventDetailPage } from './features/events/pages/EventDetailPage'
 import { EventFormPage } from './features/events/pages/EventFormPage'
+import { MyEventsPage } from './features/events/pages/MyEventsPage'
+import { EventDashboardPage } from './features/events/pages/EventDashboardPage'
 import { BookingSummaryPage } from './features/events/pages/BookingSummaryPage'
 import { CodeScanPage } from './features/code/pages/CodeScanPage'
 import { MyTicketsPage } from './features/code/pages/MyTicketsPage'
@@ -75,6 +77,18 @@ const myTicketsEventRoute = createRoute({
   component: MyTicketsEventPage,
 })
 
+const myEventsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/my-events',
+  component: MyEventsPage,
+})
+
+const eventDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/my-events/$eventId',
+  component: EventDashboardPage,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   eventsListRoute,
@@ -85,6 +99,8 @@ const routeTree = rootRoute.addChildren([
   codeScanRoute,
   myTicketsRoute,
   myTicketsEventRoute,
+  myEventsRoute,
+  eventDashboardRoute,
 ])
 
 export const router = createRouter({ routeTree })

@@ -23,6 +23,27 @@ export const EventResponseSchema = z.object({
 
 export type EventResponse = z.infer<typeof EventResponseSchema>
 
+export const EventDashboardResponseSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string(),
+  category: z.string(),
+  venue: z.string(),
+  imageUrl: z.string().nullable(),
+  startTime: z.string(),
+  endTime: z.string(),
+  capacity: z.number().int().nonnegative(),
+  ticketsSold: z.number().int().nonnegative(),
+  remainingCapacity: z.number().int().nonnegative(),
+  price: z.coerce.number().finite().nonnegative(),
+  totalRevenue: z.coerce.number().finite().nonnegative(),
+  status: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
+
+export type EventDashboardResponse = z.infer<typeof EventDashboardResponseSchema>
+
 export const PageSchema = <T extends z.ZodTypeAny>(inner: T) =>
   z.object({
     content: z.array(inner),

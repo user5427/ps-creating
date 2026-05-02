@@ -24,6 +24,15 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
                              @Param("from") OffsetDateTime from,
                              Pageable pageable);
 
+    @Query("""
+           select e
+           from Event e
+           where e.organizerId = :organizerId
+           order by e.startTime desc
+           """)
+    Page<Event> findByOrganizerId(@Param("organizerId") UUID organizerId,
+                                  Pageable pageable);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select e from Event e where e.id = :id")
     Optional<Event> findByIdForUpdate(@Param("id") UUID id);

@@ -6,6 +6,7 @@ import {
   fetchCheckoutPaymentStatus,
   fetchEvent,
   fetchEvents,
+  fetchOrganizerEvents,
   updateEvent,
   type ClaimFreeTicketsPayload,
   type CreateCheckoutPaymentIntentPayload,
@@ -17,6 +18,13 @@ export function useEvents(page: number, size = 12) {
   return useQuery({
     queryKey: ['events', { page, size }],
     queryFn: () => fetchEvents(page, size),
+  })
+}
+
+export function useOrganizerEvents(page: number, size = 12) {
+  return useQuery({
+    queryKey: ['organizer-events', { page, size }],
+    queryFn: () => fetchOrganizerEvents(page, size),
   })
 }
 
