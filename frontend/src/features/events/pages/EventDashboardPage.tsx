@@ -119,7 +119,7 @@ export function EventDashboardPage() {
 
         <Button
             startIcon={<EditIcon />}
-            onClick={() => navigate({ to: `/events/${eventId}/edit` })}
+            onClick={() => navigate({ to: `/events/${eventId}/edit`, search: { returnTo: `/my-events/${eventId}` } })}
             variant="contained"
         >
             Edit Event

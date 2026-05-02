@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@mui/material'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
-import { useNavigate, useParams } from '@tanstack/react-router'
+import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import { AxiosError } from 'axios'
 import { ConflictDialog } from '../components/ConflictDialog'
 import {
@@ -49,7 +49,9 @@ function buildDefaults(): EventFormValues {
 
 export function EventFormPage({ mode }: Props) {
   const params = useParams({ strict: false })
+  const search = useSearch({ strict: false })
   const eventId = params.eventId as string | undefined
+  const returnTo = (search as any)?.returnTo || '/events'
   const navigate = useNavigate()
 
   const {
@@ -105,7 +107,7 @@ export function EventFormPage({ mode }: Props) {
       } else if (eventId && existing) {
         const version = overwriteVersion ?? existing.version
         const updated = await updateMutation.mutateAsync({ ...payload, version })
-        navigate({ to: '/events/$eventId', params: { eventId: updated.id } })
+        navigate({ to: returnTo as any })
       }
     } catch (err) {
       handleError(err)
@@ -365,7 +367,7 @@ export function EventFormPage({ mode }: Props) {
             </Button>
             <Button
               color="inherit"
-              onClick={() => navigate({ to: '/events' })}
+              onClick={() => navigate({ to: returnTo as any })}
               disabled={isSubmitting}
             >
               Cancel

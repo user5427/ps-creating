@@ -61,7 +61,13 @@ export function MyEventsPage() {
             Manage your events and view sales metrics.
           </Typography>
         </Box>
-        <Button component={Link} to="/events/new" variant="contained" size="large">
+        <Button
+          component={Link}
+          to="/events/new"
+          search={{ returnTo: '/my-events' }}
+          variant="contained"
+          size="large"
+        >
           Create event
         </Button>
       </Stack>
@@ -99,7 +105,7 @@ export function MyEventsPage() {
           <Typography variant="h6" color="text.secondary">
             No events created yet
           </Typography>
-          <Button component={Link} to="/events/new" variant="contained">
+          <Button component={Link} to="/events/new" search={{ returnTo: '/my-events' }} variant="contained">
             Create your first event
           </Button>
         </Stack>

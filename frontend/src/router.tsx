@@ -16,6 +16,11 @@ function parseCheckoutSearch(search: Record<string, unknown>) {
   return { quantity }
 }
 
+function parseEventFormSearch(search: Record<string, unknown>) {
+  const returnTo = typeof search.returnTo === 'string' ? search.returnTo : '/events'
+  return { returnTo }
+}
+
 const rootRoute = createRootRoute({
   component: RootLayout,
 })
@@ -37,6 +42,7 @@ const eventsListRoute = createRoute({
 const eventCreateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/new',
+  validateSearch: parseEventFormSearch,
   component: () => <EventFormPage mode="create" />,
 })
 
@@ -56,6 +62,7 @@ const eventCheckoutRoute = createRoute({
 const eventEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/$eventId/edit',
+  validateSearch: parseEventFormSearch,
   component: () => <EventFormPage mode="edit" />,
 })
 
