@@ -11,7 +11,9 @@ import java.util.UUID;
         name = "codes",
         indexes = {
                 @Index(name = "idx_codes_created_at", columnList = "created_at"),
-                @Index(name = "idx_codes_payment_id", columnList = "payment_id")
+                @Index(name = "idx_codes_payment_id", columnList = "payment_id"),
+                @Index(name = "idx_codes_user_created", columnList = "user_id, created_at"),
+                @Index(name = "idx_codes_user_event_created", columnList = "user_id, event_id, created_at")
         }
 )
 public class Code {
@@ -19,13 +21,13 @@ public class Code {
     @Id
     private UUID id;
 
-        @ManyToOne(fetch = FetchType.LAZY, optional = false)
-        @JoinColumn(name = "user_id", nullable = false)
-        private User user;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-        @ManyToOne(fetch = FetchType.LAZY, optional = false)
-        @JoinColumn(name = "event_id", nullable = false)
-        private Event event;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
 
     @Column(name = "payment_id")
     private UUID paymentId;

@@ -5,7 +5,6 @@ import com.example.app.api.event.EventResponse;
 import com.example.app.domain.code.CodeAccessDeniedException;
 import com.example.app.domain.code.CodeAlreadyExistsException;
 import com.example.app.domain.code.CodeNotFoundException;
-import com.example.app.domain.code.CodePaymentNotCompletedException;
 import com.example.app.domain.event.Event;
 import com.example.app.domain.event.EventAccessDeniedException;
 import com.example.app.domain.event.EventMapper;
@@ -70,15 +69,6 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.simple("CONFLICT", message));
     }
-
-        @ExceptionHandler(CodePaymentNotCompletedException.class)
-        public ResponseEntity<ErrorResponse> handlePaymentNotCompleted(CodePaymentNotCompletedException ex) {
-        String message = "Payment %s is not completed (status=%s)"
-            .formatted(ex.getPaymentIntentId(), ex.getPaymentStatus());
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(ErrorResponse.simple("PAYMENT_NOT_COMPLETED", message));
-        }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {

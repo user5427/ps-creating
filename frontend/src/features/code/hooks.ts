@@ -1,10 +1,10 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import {
-  confirmPurchase,
+  fetchMyTicketGroups,
+  fetchMyTicketsByEvent,
   generateCode,
   scanCode,
   viewCode,
-  type ConfirmPurchasePayload,
   type GenerateCodePayload,
   type ScanCodePayload,
 } from './api'
@@ -21,14 +21,23 @@ export function useScanCode() {
   })
 }
 
-export function useConfirmPurchase() {
-  return useMutation({
-    mutationFn: (payload: ConfirmPurchasePayload) => confirmPurchase(payload),
-  })
-}
-
 export function useViewCode() {
   return useMutation({
     mutationFn: (codeId: string) => viewCode(codeId),
+  })
+}
+
+export function useMyTicketGroups(page: number, size: number) {
+  return useQuery({
+    queryKey: ['my-tickets', 'groups', page, size],
+    queryFn: () => fetchMyTicketGroups(page, size),
+  })
+}
+
+export function useMyTicketsByEvent(eventId: string | undefined, page: number, size: number) {
+  return useQuery({
+    queryKey: ['my-tickets', 'event', eventId, page, size],
+    queryFn: () => fetchMyTicketsByEvent(eventId!, page, size),
+    enabled: !!eventId,
   })
 }

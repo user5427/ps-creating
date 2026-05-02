@@ -70,10 +70,16 @@ export function BookingSummaryPage() {
           clientSecret ? { clientSecret, appearance: { theme: 'stripe' as const } } : undefined,
       [clientSecret])
 
-  const refreshEvents = () => void queryClient.invalidateQueries({ queryKey: ['events'] })
+   const refreshAfterTicketMutation = () => {
+    void queryClient.invalidateQueries({ queryKey: ['events'] })
+    void queryClient.invalidateQueries({ queryKey: ['events', eventId] })
+    void queryClient.invalidateQueries({ queryKey: ['my-tickets'] })
+  }
 
   useEffect(() => {
-    if (fulfilled) refreshEvents()
+    if (fulfilled) {
+      refreshAfterTicketMutation()
+    }
   }, [fulfilled])
 
   const handleStartCheckout = async () => {
@@ -95,7 +101,7 @@ export function BookingSummaryPage() {
     setCheckoutError(null)
     try {
       const response = await claimFreeTickets.mutateAsync({ eventId: event.id, quantity })
-      refreshEvents()
+      refreshAfterTicketMutation()
       setFreeClaimedTickets(response.claimedTickets)
     } catch {
       setCheckoutError('Failed to claim free ticket(s). Please try again.')

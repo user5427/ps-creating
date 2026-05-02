@@ -44,6 +44,11 @@ export function TopNav() {
               Create event
             </Button>
           )}
+          {role === 'ATTENDEE' && (
+            <Button component={Link} to="/my-tickets" color="inherit" sx={{ color: 'text.primary' }}>
+              My tickets
+            </Button>
+          )}
         </Stack>
 
         <Stack direction="row" spacing={2} alignItems="center">
