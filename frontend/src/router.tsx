@@ -84,6 +84,7 @@ const myTicketsEventRoute = createRoute({
   component: MyTicketsEventPage,
 })
 
+<<<<<<< HEAD
 const myEventsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-events',
@@ -96,6 +97,8 @@ const eventDashboardRoute = createRoute({
   component: EventDashboardPage,
 })
 
+=======
+>>>>>>> origin/main
 const routeTree = rootRoute.addChildren([
   indexRoute,
   eventsListRoute,
@@ -106,8 +109,11 @@ const routeTree = rootRoute.addChildren([
   codeScanRoute,
   myTicketsRoute,
   myTicketsEventRoute,
+<<<<<<< HEAD
   myEventsRoute,
   eventDashboardRoute,
+=======
+>>>>>>> origin/main
 ])
 
 export const router = createRouter({ routeTree })
