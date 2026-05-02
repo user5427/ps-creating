@@ -1,7 +1,7 @@
 package com.example.app.domain.code;
 
-import com.example.app.api.code.CodeEventResponse;
 import com.example.app.api.code.CodeResponse;
+import com.example.app.api.code.CodeEventResponse;
 import com.example.app.api.code.GenerateCodeRequest;
 import com.example.app.api.code.MyTicketEntryResponse;
 import com.example.app.api.code.MyTicketEventSummaryResponse;
@@ -15,6 +15,7 @@ import com.example.app.domain.user.Role;
 import com.example.app.domain.user.User;
 import com.example.app.domain.user.UserRepository;
 import com.example.app.util.CodeQrUtils;
+import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,7 +47,7 @@ public class DefaultCodeService implements CodeService {
     @Override
     public CodeResponse generate(GenerateCodeRequest request) {
         UUID codeId = request.id() != null ? request.id() : UUID.randomUUID();
-        if (codeRepository.existsById(codeId)) {
+        if (codeRepository.existsById(Objects.requireNonNull(codeId))) {
             throw new CodeAlreadyExistsException(codeId);
         }
 
@@ -115,12 +116,12 @@ public class DefaultCodeService implements CodeService {
     }
 
     private User requireUser(UUID userId) {
-        return userRepository.findById(userId)
+        return userRepository.findById(Objects.requireNonNull(userId))
                 .orElseThrow(() -> new CodeAccessDeniedException("User does not exist: " + userId));
     }
 
     private Event requireEvent(UUID eventId) {
-        return eventRepository.findById(eventId)
+        return eventRepository.findById(Objects.requireNonNull(eventId))
                 .orElseThrow(() -> new EventNotFoundException(eventId));
     }
 }

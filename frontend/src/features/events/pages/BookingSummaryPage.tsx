@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Box,
@@ -24,6 +23,7 @@ import {
 } from '../hooks'
 import {PaymentForm} from "../components/PaymentForm";
 import {BookingSummaryRow} from "../components/BookingSummaryRow";
+import {useEffect, useMemo, useState} from "react";
 
 const TICKET_TYPE = 'General Admission'
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? ''
@@ -117,9 +117,9 @@ export function BookingSummaryPage() {
 
   if (isLoading) {
     return (
-        <Container sx={{ py: 10, textAlign: 'center' }}>
-          <CircularProgress />
-        </Container>
+      <Container sx={{ py: 10, textAlign: 'center' }}>
+        <CircularProgress />
+      </Container>
     )
   }
 
@@ -233,3 +233,4 @@ export function BookingSummaryPage() {
       </Container>
   )
 }
+

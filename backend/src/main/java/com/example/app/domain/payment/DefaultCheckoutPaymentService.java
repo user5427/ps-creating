@@ -3,6 +3,7 @@ package com.example.app.domain.payment;
 import com.example.app.api.payment.ClaimFreeTicketsResponse;
 import com.example.app.api.payment.CheckoutPaymentStatusResponse;
 import com.example.app.api.payment.CreateCheckoutPaymentIntentResponse;
+import com.example.app.domain.code.TicketPurchaseConfirmedEvent;
 import com.example.app.domain.code.Code;
 import com.example.app.domain.code.CodeRepository;
 import com.example.app.domain.event.Event;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,19 +37,22 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
     private final CodeRepository codeRepository;
     private final PricingStrategy pricingStrategy;
     private final EventServiceDecorator eventServiceDecorator;
+    private final ApplicationEventPublisher eventPublisher;
 
     public DefaultCheckoutPaymentService(CheckoutPaymentRepository checkoutPaymentRepository,
                                          EventRepository eventRepository,
                                          UserRepository userRepository,
                                          CodeRepository codeRepository,
                                          PricingStrategy pricingStrategy,
-                                         EventServiceDecorator eventServiceDecorator) {
+                                         EventServiceDecorator eventServiceDecorator,
+                                         ApplicationEventPublisher eventPublisher) {
         this.checkoutPaymentRepository = checkoutPaymentRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.codeRepository = codeRepository;
         this.pricingStrategy = pricingStrategy;
         this.eventServiceDecorator = eventServiceDecorator;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -179,6 +184,17 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
                         createdCodes.add(new Code(UUID.randomUUID(), attendee, event, payment.getId()));
                     }
                     codeRepository.saveAll(createdCodes);
+
+                    for (Code code : createdCodes) {
+                        eventPublisher.publishEvent(new TicketPurchaseConfirmedEvent(
+                                attendee.getEmail(),
+                                attendee.getFirstName(),
+                                event.getTitle(),
+                                event.getVenue(),
+                                event.getStartTime(),
+                                code.getId(),
+                                code.getId().toString()));
+                    }
 
                     event.setSeatsSold(event.getSeatsSold() + payment.getQuantity());
                     eventRepository.save(event);
