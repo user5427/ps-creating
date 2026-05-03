@@ -3,11 +3,13 @@ import {
   CheckoutPaymentStatusResponseSchema,
   ClaimFreeTicketsResponseSchema,
   CreateCheckoutPaymentIntentResponseSchema,
+  EventDashboardResponseSchema,
   EventResponseSchema,
   PageSchema,
   type CheckoutPaymentStatusResponse,
   type ClaimFreeTicketsResponse,
   type CreateCheckoutPaymentIntentResponse,
+  type EventDashboardResponse,
   type EventResponse,
   type Page,
 } from './schemas'
@@ -40,6 +42,14 @@ export interface ClaimFreeTicketsPayload {
 export async function fetchEvents(page: number, size: number): Promise<Page<EventResponse>> {
   const { data } = await apiClient.get('/events', { params: { page, size } })
   return PageSchema(EventResponseSchema).parse(data)
+}
+
+export async function fetchOrganizerEvents(
+  page: number,
+  size: number,
+): Promise<Page<EventDashboardResponse>> {
+  const { data } = await apiClient.get('/events/me', { params: { page, size } })
+  return PageSchema(EventDashboardResponseSchema).parse(data)
 }
 
 export async function fetchEvent(id: string): Promise<EventResponse> {

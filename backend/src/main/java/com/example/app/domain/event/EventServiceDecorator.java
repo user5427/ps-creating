@@ -1,6 +1,7 @@
 package com.example.app.domain.event;
 
 import com.example.app.api.event.CreateEventRequest;
+import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import java.time.Duration;
@@ -56,6 +57,11 @@ public class EventServiceDecorator implements EventService {
     @Override
     public EventResponse get(UUID id) {
         return delegate.get(id);
+    }
+
+    @Override
+    public Page<EventDashboardResponse> listOrganizerEvents(UUID organizerId, Pageable pageable) {
+        return delegate.listOrganizerEvents(organizerId, pageable);
     }
 
     @Override

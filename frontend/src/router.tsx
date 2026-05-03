@@ -3,6 +3,8 @@ import { RootLayout } from './components/layout/RootLayout'
 import { EventsListPage } from './features/events/pages/EventsListPage'
 import { EventDetailPage } from './features/events/pages/EventDetailPage'
 import { EventFormPage } from './features/events/pages/EventFormPage'
+import { MyEventsPage } from './features/events/pages/MyEventsPage'
+import { EventDashboardPage } from './features/events/pages/EventDashboardPage'
 import { BookingSummaryPage } from './features/events/pages/BookingSummaryPage'
 import { CodeScanPage } from './features/code/pages/CodeScanPage'
 import { MyTicketsPage } from './features/code/pages/MyTicketsPage'
@@ -12,6 +14,11 @@ function parseCheckoutSearch(search: Record<string, unknown>) {
   const quantityValue = Number(search.quantity)
   const quantity = Number.isInteger(quantityValue) && quantityValue > 0 ? quantityValue : 1
   return { quantity }
+}
+
+function parseEventFormSearch(search: Record<string, unknown>) {
+  const returnTo = typeof search.returnTo === 'string' ? search.returnTo : '/events'
+  return { returnTo }
 }
 
 const rootRoute = createRootRoute({
@@ -35,6 +42,7 @@ const eventsListRoute = createRoute({
 const eventCreateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/new',
+  validateSearch: parseEventFormSearch,
   component: () => <EventFormPage mode="create" />,
 })
 
@@ -54,6 +62,7 @@ const eventCheckoutRoute = createRoute({
 const eventEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/$eventId/edit',
+  validateSearch: parseEventFormSearch,
   component: () => <EventFormPage mode="edit" />,
 })
 
@@ -75,6 +84,21 @@ const myTicketsEventRoute = createRoute({
   component: MyTicketsEventPage,
 })
 
+<<<<<<< HEAD
+const myEventsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/my-events',
+  component: MyEventsPage,
+})
+
+const eventDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/my-events/$eventId',
+  component: EventDashboardPage,
+})
+
+=======
+>>>>>>> origin/main
 const routeTree = rootRoute.addChildren([
   indexRoute,
   eventsListRoute,
@@ -85,6 +109,11 @@ const routeTree = rootRoute.addChildren([
   codeScanRoute,
   myTicketsRoute,
   myTicketsEventRoute,
+<<<<<<< HEAD
+  myEventsRoute,
+  eventDashboardRoute,
+=======
+>>>>>>> origin/main
 ])
 
 export const router = createRouter({ routeTree })

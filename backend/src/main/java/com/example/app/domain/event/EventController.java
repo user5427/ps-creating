@@ -1,6 +1,7 @@
 package com.example.app.domain.event;
 
 import com.example.app.api.event.CreateEventRequest;
+import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import com.example.app.web.ActorContext;
@@ -28,6 +29,12 @@ public class EventController {
     @GetMapping
     public Page<EventResponse> list(@PageableDefault(size = 12) Pageable pageable) {
         return eventService.listUpcoming(pageable);
+    }
+
+    @GetMapping("/me")
+    public Page<EventDashboardResponse> listMyEvents(@PageableDefault(size = 12) Pageable pageable) {
+        requireOrganizer();
+        return eventService.listOrganizerEvents(actorContext.getActorId(), pageable);
     }
 
     @GetMapping("/{id}")

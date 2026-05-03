@@ -161,6 +161,7 @@ export function EventDetailPage() {
                       navigate({
                         to: '/events/$eventId/edit',
                         params: { eventId },
+                        search: { returnTo: '/events/$eventId' },
                       })
                     }
                     variant="outlined"

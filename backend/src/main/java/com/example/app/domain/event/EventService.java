@@ -1,6 +1,7 @@
 package com.example.app.domain.event;
 
 import com.example.app.api.event.CreateEventRequest;
+import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import java.util.UUID;
@@ -16,4 +17,6 @@ public interface EventService {
     EventResponse create(CreateEventRequest request, UUID organizerId);
 
     EventResponse update(UUID id, UpdateEventRequest request, UUID actorId);
+
+    Page<EventDashboardResponse> listOrganizerEvents(UUID organizerId, Pageable pageable);
 }
