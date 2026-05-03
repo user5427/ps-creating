@@ -13,7 +13,6 @@ import {
   DialogTitle,
   Pagination,
   Stack,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import { Link, useParams } from '@tanstack/react-router'
@@ -81,15 +80,7 @@ export function MyTicketsEventPage() {
                           <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                             Ticket #{(page * PAGE_SIZE) + index + 1}
                           </Typography>
-                          <Tooltip title={ticket.qrData}>
-                            <Typography variant="caption" color="text.secondary" sx={{ cursor: 'help' }}>
-                              {ticket.qrData.substring(0, 12)}...
-                            </Typography>
-                          </Tooltip>
                         </Box>
-                        <Typography variant="caption" color="text.secondary">
-                          Scanned: {ticket.scanCount}
-                        </Typography>
                       </Stack>
                       <Button variant="contained" onClick={() => setFullscreenQr(ticket.qrData)}>
                         Full screen

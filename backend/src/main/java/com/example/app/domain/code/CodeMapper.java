@@ -38,8 +38,7 @@ public class CodeMapper {
 
     public MyTicketEntryResponse toMyTicketEntry(Code code, String qrData) {
         return new MyTicketEntryResponse(
-                qrData,
-                code.getScanCount());
+            qrData);
     }
 
     public CodeEventResponse toEventResponse(Code code) {

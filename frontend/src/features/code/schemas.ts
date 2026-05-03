@@ -64,7 +64,6 @@ export const MyTicketEventSummarySchema = z.object({
 
 export const MyTicketEntrySchema = z.object({
   qrData: z.string(),
-  scanCount: z.number().int().nonnegative(),
 })
 
 export const MyTicketEventsPageSchema = PageSchema(MyTicketEventSummarySchema)
