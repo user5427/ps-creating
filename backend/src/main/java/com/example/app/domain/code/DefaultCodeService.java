@@ -1,7 +1,11 @@
 package com.example.app.domain.code;
 
 import com.example.app.api.code.CodeResponse;
+import com.example.app.api.code.CodeEventResponse;
 import com.example.app.api.code.GenerateCodeRequest;
+import com.example.app.api.code.MyTicketEntryResponse;
+import com.example.app.api.code.MyTicketEventSummaryResponse;
+import com.example.app.api.code.MyTicketsByEventResponse;
 import com.example.app.api.code.ScanCodeRequest;
 import com.example.app.api.code.ScanCodeResponse;
 import com.example.app.domain.event.Event;
@@ -11,7 +15,10 @@ import com.example.app.domain.user.Role;
 import com.example.app.domain.user.User;
 import com.example.app.domain.user.UserRepository;
 import com.example.app.util.CodeQrUtils;
+import java.util.Objects;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +47,7 @@ public class DefaultCodeService implements CodeService {
     @Override
     public CodeResponse generate(GenerateCodeRequest request) {
         UUID codeId = request.id() != null ? request.id() : UUID.randomUUID();
-        if (codeRepository.existsById(codeId)) {
+        if (codeRepository.existsById(Objects.requireNonNull(codeId))) {
             throw new CodeAlreadyExistsException(codeId);
         }
 
@@ -82,13 +89,39 @@ public class DefaultCodeService implements CodeService {
         return codeMapper.toResponse(code, codeQrUtils.createPayload(code.getId()));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MyTicketEventSummaryResponse> listMyTickets(UUID attendeeId, Pageable pageable) {
+        return codeRepository.findTicketGroupsByAttendeeId(attendeeId, pageable)
+                .map(codeMapper::toMyTicketEventSummary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MyTicketsByEventResponse listMyTicketsForEvent(UUID attendeeId, UUID eventId, Pageable pageable) {
+        Page<Code> tickets = codeRepository.findByUserIdAndEventIdOrderByCreatedAtAsc(attendeeId, eventId, pageable);
+
+        Event event = requireEvent(eventId);
+        CodeEventResponse eventResponse = new CodeEventResponse(
+                event.getId(),
+                event.getTitle(),
+                event.getVenue(),
+                event.getStartTime(),
+                event.getEndTime());
+
+        Page<MyTicketEntryResponse> entries = tickets.map(code ->
+                codeMapper.toMyTicketEntry(code, codeQrUtils.createPayload(code.getId())));
+
+        return new MyTicketsByEventResponse(eventResponse, entries);
+    }
+
     private User requireUser(UUID userId) {
-        return userRepository.findById(userId)
+        return userRepository.findById(Objects.requireNonNull(userId))
                 .orElseThrow(() -> new CodeAccessDeniedException("User does not exist: " + userId));
     }
 
     private Event requireEvent(UUID eventId) {
-        return eventRepository.findById(eventId)
+        return eventRepository.findById(Objects.requireNonNull(eventId))
                 .orElseThrow(() -> new EventNotFoundException(eventId));
     }
 }

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PageSchema } from '../events/schemas'
 
 export const CodeUserSchema = z.object({
   id: z.string().uuid(),
@@ -52,3 +53,24 @@ export const ViewCodeFormSchema = z.object({
 })
 
 export type ViewCodeFormValues = z.infer<typeof ViewCodeFormSchema>
+
+export const MyTicketEventSummarySchema = z.object({
+  eventId: z.string().uuid(),
+  eventTitle: z.string(),
+  eventStartTime: z.string(),
+  eventEndTime: z.string(),
+  ticketQuantity: z.number().int().nonnegative(),
+})
+
+export const MyTicketEntrySchema = z.object({
+  qrData: z.string(),
+})
+
+export const MyTicketEventsPageSchema = PageSchema(MyTicketEventSummarySchema)
+export const MyTicketsByEventResponseSchema = z.object({
+  event: CodeEventSchema,
+  tickets: PageSchema(MyTicketEntrySchema),
+})
+
+export type MyTicketEventsPage = z.infer<typeof MyTicketEventsPageSchema>
+export type MyTicketsByEventResponse = z.infer<typeof MyTicketsByEventResponseSchema>

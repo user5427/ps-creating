@@ -24,6 +24,17 @@ spring:
       allowed-origins: "http://localhost:5173"
       allowed-methods: "*"
       allowed-headers: "*"
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:false}
 
 server:
   port: 8080
@@ -41,9 +52,11 @@ stripe:
 
 # Application settings
 app:
+  mail:
+    from: ${MAIL_FROM:no-reply@app.local}
   audit:
     enabled: true          # toggles the AuditAspect (quality requirement #7)
-  dev:
+  dev: 
     organizer-id: 00000000-0000-0000-0000-000000000001
     attendee-id:  00000000-0000-0000-0000-000000000002
 

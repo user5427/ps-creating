@@ -1,6 +1,7 @@
 package com.example.app.domain.event;
 
 import com.example.app.api.event.CreateEventRequest;
+import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import com.example.app.aspect.Audited;
@@ -37,6 +38,14 @@ public class DefaultEventService implements EventService {
     @Transactional(readOnly = true)
     public EventResponse get(UUID id) {
         return eventMapper.toResponse(requireEvent(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<EventDashboardResponse> listOrganizerEvents(UUID organizerId, Pageable pageable) {
+        return eventRepository
+                .findByOrganizerId(organizerId, pageable)
+                .map(eventMapper::toDashboardResponse);
     }
 
     @Override
