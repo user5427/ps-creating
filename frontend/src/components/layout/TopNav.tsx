@@ -30,6 +30,11 @@ export function TopNav() {
             Events
           </Button>
           {role === 'ORGANIZER' && (
+            <Button component={Link} to="/my-events" color="inherit" sx={{ color: 'text.primary' }}>
+              My events
+            </Button>
+          )}
+          {role === 'ORGANIZER' && (
             <Button component={Link} to="/codes/scan" color="inherit" sx={{ color: 'text.primary' }}>
               Scan QR code
             </Button>
@@ -42,6 +47,11 @@ export function TopNav() {
               sx={{ color: 'text.primary' }}
             >
               Create event
+            </Button>
+          )}
+          {role === 'ATTENDEE' && (
+            <Button component={Link} to="/my-tickets" color="inherit" sx={{ color: 'text.primary' }}>
+              My tickets
             </Button>
           )}
         </Stack>

@@ -1,7 +1,6 @@
 package com.example.app.domain.code;
 
 import com.example.app.api.code.CodeResponse;
-import com.example.app.api.code.ConfirmPurchaseRequest;
 import com.example.app.api.code.GenerateCodeRequest;
 import com.example.app.api.code.ScanCodeRequest;
 import com.example.app.api.code.ScanCodeResponse;
@@ -28,14 +27,6 @@ public class CodeController {
     public ResponseEntity<CodeResponse> generate(@Valid @RequestBody GenerateCodeRequest request) {
         requireOrganizer();
         CodeResponse created = codeService.generate(request);
-        return ResponseEntity
-                .created(URI.create("/api/codes/" + created.id()))
-                .body(created);
-    }
-
-    @PostMapping("/confirm-purchase")
-    public ResponseEntity<CodeResponse> confirmPurchase(@Valid @RequestBody ConfirmPurchaseRequest request) {
-        CodeResponse created = codeService.confirmPurchase(request, actorContext.getActorId());
         return ResponseEntity
                 .created(URI.create("/api/codes/" + created.id()))
                 .body(created);

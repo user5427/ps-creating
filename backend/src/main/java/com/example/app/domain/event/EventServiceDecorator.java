@@ -1,6 +1,7 @@
 package com.example.app.domain.event;
 
 import com.example.app.api.event.CreateEventRequest;
+import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import java.time.Duration;
@@ -59,17 +60,27 @@ public class EventServiceDecorator implements EventService {
     }
 
     @Override
+    public Page<EventDashboardResponse> listOrganizerEvents(UUID organizerId, Pageable pageable) {
+        return delegate.listOrganizerEvents(organizerId, pageable);
+    }
+
+    @Override
     public EventResponse create(CreateEventRequest request, UUID organizerId) {
         EventResponse created = delegate.create(request, organizerId);
-        listCache.clear();
+        invalidateListCache();
         return created;
     }
 
     @Override
     public EventResponse update(UUID id, UpdateEventRequest request, UUID actorId) {
         EventResponse updated = delegate.update(id, request, actorId);
-        listCache.clear();
+        invalidateListCache();
         return updated;
+    }
+
+    public void invalidateListCache() {
+        log.debug("EventServiceDecorator list cache invalidated");
+        listCache.clear();
     }
 
     private record CacheEntry(Page<EventResponse> page, Instant expiresAt) {}

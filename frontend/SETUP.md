@@ -12,6 +12,7 @@ cp .env.example .env.local
 
 Available variables:
 - `VITE_API_URL` - Backend API URL (default: http://localhost:8080/api)
+- `VITE_STRIPE_PUBLISHABLE_KEY` - Stripe publishable key from stripe console
 
 ## Running the Application
 

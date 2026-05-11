@@ -185,6 +185,7 @@ export function EventsListPage() {
           <Button
             component={Link}
             to="/events/new"
+            search={{ returnTo: '/events' }}
             variant="contained"
             size="large"
           >

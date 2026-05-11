@@ -1,9 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  claimFreeTickets,
+  createCheckoutPaymentIntent,
   createEvent,
+  fetchCheckoutPaymentStatus,
   fetchEvent,
   fetchEvents,
+  fetchOrganizerEvents,
   updateEvent,
+  type ClaimFreeTicketsPayload,
+  type CreateCheckoutPaymentIntentPayload,
   type CreateEventPayload,
   type UpdateEventPayload,
 } from './api'
@@ -12,6 +18,13 @@ export function useEvents(page: number, size = 12) {
   return useQuery({
     queryKey: ['events', { page, size }],
     queryFn: () => fetchEvents(page, size),
+  })
+}
+
+export function useOrganizerEvents(page: number, size = 12) {
+  return useQuery({
+    queryKey: ['organizer-events', { page, size }],
+    queryFn: () => fetchOrganizerEvents(page, size),
   })
 }
 
@@ -40,6 +53,37 @@ export function useUpdateEvent(id: string) {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['events'] })
       qc.setQueryData(['events', id], data)
+    },
+  })
+}
+
+export function useCreateCheckoutPaymentIntent(eventId: string) {
+  return useMutation({
+    mutationFn: (payload: CreateCheckoutPaymentIntentPayload) =>
+      createCheckoutPaymentIntent(eventId, payload),
+  })
+}
+
+export function useCheckoutPaymentStatus(paymentIntentId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: ['checkout-payment-status', paymentIntentId],
+    queryFn: () => fetchCheckoutPaymentStatus(paymentIntentId!),
+    enabled: enabled && !!paymentIntentId,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status
+      return status === 'INITIATED' || status === 'PAYMENT_SUCCEEDED' ? 1500 : false
+    },
+  })
+}
+
+export function useClaimFreeTickets() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: ClaimFreeTicketsPayload) => claimFreeTickets(payload),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['events'] })
+      qc.invalidateQueries({ queryKey: ['events', variables.eventId] })
+      qc.invalidateQueries({ queryKey: ['my-tickets'] })
     },
   })
 }

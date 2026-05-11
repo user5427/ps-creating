@@ -56,8 +56,7 @@ app:
     from: ${MAIL_FROM:no-reply@app.local}
   audit:
     enabled: true          # toggles the AuditAspect (quality requirement #7)
-  dev:
-    fake-payments-enabled: ${FAKE_PAYMENTS_ENABLED:true}
+  dev: 
     organizer-id: 00000000-0000-0000-0000-000000000001
     attendee-id:  00000000-0000-0000-0000-000000000002
 

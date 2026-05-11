@@ -3,6 +3,8 @@ package com.example.app.domain.code;
 import com.example.app.api.code.CodeEventResponse;
 import com.example.app.api.code.CodeResponse;
 import com.example.app.api.code.CodeUserResponse;
+import com.example.app.api.code.MyTicketEntryResponse;
+import com.example.app.api.code.MyTicketEventSummaryResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,20 +17,36 @@ public class CodeMapper {
                 code.getUser().getLastName(),
                 code.getUser().getEmail());
 
-        CodeEventResponse event = new CodeEventResponse(
-                code.getEvent().getId(),
-                code.getEvent().getTitle(),
-                code.getEvent().getVenue(),
-                code.getEvent().getStartTime(),
-                code.getEvent().getEndTime());
-
         return new CodeResponse(
                 code.getId(),
                 code.getScanCount(),
                 qrData,
                 user,
-                event,
+                toEventResponse(code),
                 code.getCreatedAt(),
                 code.getUpdatedAt());
+    }
+
+    public MyTicketEventSummaryResponse toMyTicketEventSummary(CodeRepository.MyTicketEventGroupProjection projection) {
+        return new MyTicketEventSummaryResponse(
+                projection.getEventId(),
+                projection.getEventTitle(),
+                projection.getEventStartTime(),
+                projection.getEventEndTime(),
+                (int) projection.getTicketQuantity());
+    }
+
+    public MyTicketEntryResponse toMyTicketEntry(Code code, String qrData) {
+        return new MyTicketEntryResponse(
+            qrData);
+    }
+
+    public CodeEventResponse toEventResponse(Code code) {
+        return new CodeEventResponse(
+                code.getEvent().getId(),
+                code.getEvent().getTitle(),
+                code.getEvent().getVenue(),
+                code.getEvent().getStartTime(),
+                code.getEvent().getEndTime());
     }
 }
