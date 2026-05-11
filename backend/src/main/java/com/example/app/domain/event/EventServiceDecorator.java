@@ -5,6 +5,7 @@ import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,24 +35,34 @@ public class EventServiceDecorator implements EventService {
     private static final Duration TTL = Duration.ofSeconds(30);
 
     private final EventService delegate;
-    private final ConcurrentMap<Pageable, CacheEntry> listCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<CacheKey, CacheEntry> listCache = new ConcurrentHashMap<>();
 
     public EventServiceDecorator(@Qualifier("defaultEventService") EventService delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Page<EventResponse> listUpcoming(Pageable pageable) {
-        CacheEntry cached = listCache.get(pageable);
+    public Page<EventResponse> listUpcoming(String category,
+                                            String location,
+                                            LocalDate startDate,
+                                            LocalDate endDate,
+                                            Pageable pageable) {
+        CacheKey key = new CacheKey(pageable, category, location, startDate, endDate);
+        CacheEntry cached = listCache.get(key);
         Instant now = Instant.now();
         if (cached != null && cached.expiresAt.isAfter(now)) {
-            log.debug("EventServiceDecorator cache HIT for {}", pageable);
+            log.debug("EventServiceDecorator cache HIT for {}", key);
             return cached.page;
         }
-        log.debug("EventServiceDecorator cache MISS for {}", pageable);
-        Page<EventResponse> fresh = delegate.listUpcoming(pageable);
-        listCache.put(pageable, new CacheEntry(fresh, now.plus(TTL)));
+        log.debug("EventServiceDecorator cache MISS for {}", key);
+        Page<EventResponse> fresh = delegate.listUpcoming(category, location, startDate, endDate, pageable);
+        listCache.put(key, new CacheEntry(fresh, now.plus(TTL)));
         return fresh;
+    }
+
+    @Override
+    public java.util.List<String> listUpcomingCategories() {
+        return delegate.listUpcomingCategories();
     }
 
     @Override
@@ -82,6 +93,12 @@ public class EventServiceDecorator implements EventService {
         log.debug("EventServiceDecorator list cache invalidated");
         listCache.clear();
     }
+
+    private record CacheKey(Pageable pageable,
+                            String category,
+                            String location,
+                            LocalDate startDate,
+                            LocalDate endDate) {}
 
     private record CacheEntry(Page<EventResponse> page, Instant expiresAt) {}
 }

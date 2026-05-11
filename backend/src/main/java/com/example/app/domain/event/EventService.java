@@ -4,13 +4,20 @@ import com.example.app.api.event.CreateEventRequest;
 import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface EventService {
 
-    Page<EventResponse> listUpcoming(Pageable pageable);
+    Page<EventResponse> listUpcoming(String category,
+                                     String location,
+                                     LocalDate startDate,
+                                     LocalDate endDate,
+                                     Pageable pageable);
+
+    java.util.List<String> listUpcomingCategories();
 
     EventResponse get(UUID id);
 

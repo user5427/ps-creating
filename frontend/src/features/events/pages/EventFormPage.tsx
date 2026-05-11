@@ -24,6 +24,7 @@ import {
   type EventResponse,
 } from '../schemas'
 import { useCreateEvent, useEvent, useUpdateEvent } from '../hooks'
+import { defaultEventsSearch } from '../../../router'
 
 type Mode = 'create' | 'edit'
 
@@ -106,7 +107,7 @@ export function EventFormPage({ mode }: Props) {
         navigate({ to: '/events/$eventId', params: { eventId: created.id } })
       } else if (eventId && existing) {
         const version = overwriteVersion ?? existing.version
-        const updated = await updateMutation.mutateAsync({ ...payload, version })
+        await updateMutation.mutateAsync({ ...payload, version })
         navigate({ to: returnTo as any })
       }
     } catch (err) {
@@ -154,7 +155,7 @@ export function EventFormPage({ mode }: Props) {
           severity={notFound ? 'warning' : 'error'}
           action={
             notFound ? (
-              <Button color="inherit" size="small" onClick={() => navigate({ to: '/events' })}>
+              <Button color="inherit" size="small" onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}>
                 Back to events
               </Button>
             ) : (

@@ -3,21 +3,30 @@ import {
   claimFreeTickets,
   createCheckoutPaymentIntent,
   createEvent,
+  fetchEventCategories,
   fetchCheckoutPaymentStatus,
   fetchEvent,
   fetchEvents,
   fetchOrganizerEvents,
   updateEvent,
+  type EventListFilters,
   type ClaimFreeTicketsPayload,
   type CreateCheckoutPaymentIntentPayload,
   type CreateEventPayload,
   type UpdateEventPayload,
 } from './api'
 
-export function useEvents(page: number, size = 12) {
+export function useEvents(page: number, size = 12, filters: EventListFilters) {
   return useQuery({
-    queryKey: ['events', { page, size }],
-    queryFn: () => fetchEvents(page, size),
+    queryKey: ['events', { page, size, filters }],
+    queryFn: () => fetchEvents(page, size, filters),
+  })
+}
+
+export function useEventCategories() {
+  return useQuery({
+    queryKey: ['event-categories'],
+    queryFn: () => fetchEventCategories(),
   })
 }
 

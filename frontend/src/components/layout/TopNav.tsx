@@ -1,5 +1,6 @@
 import { AppBar, Box, Button, Stack, ToggleButton, ToggleButtonGroup, Toolbar, Typography } from '@mui/material'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { defaultEventsSearch } from '../../router'
 import { useAppStore, type Role } from '../../store/appStore'
 
 export function TopNav() {
@@ -26,7 +27,11 @@ export function TopNav() {
         </Typography>
 
         <Stack direction="row" spacing={3} sx={{ flexGrow: 1 }}>
-          <Button component={Link} to="/events" color="inherit" sx={{ color: 'text.primary' }}>
+          <Button
+            color="inherit"
+            sx={{ color: 'text.primary' }}
+            onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
+          >
             Events
           </Button>
           {role === 'ORGANIZER' && (
@@ -73,7 +78,7 @@ export function TopNav() {
           )}
           <Button
             variant="contained"
-            onClick={() => navigate({ to: '/events' })}
+            onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
             sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
           >
             Browse
