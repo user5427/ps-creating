@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import {
   Alert,
   Box,
@@ -30,19 +30,25 @@ function endOfDay(dateInput: string) {
 }
 
 export function EventsListPage() {
-  const [page, setPage] = useState(0);
   const navigate = useNavigate();
   const search = useSearch({ from: "/events" });
+  const page = search.page ?? 1;
 
   const role = useAppStore((s) => s.role);
   const { data: categoryOptions = [] } = useEventCategories();
-  const { data, isLoading, isError, refetch } = useEvents(page, PAGE_SIZE, {
-    category: search.category ?? "",
-    location: search.location ?? "",
-    startDate: search.startDate ?? "",
-    endDate: search.endDate ?? "",
-    sortBy: (search.sortBy ?? "NEW") as SortOption,
-  });
+
+  const filters = useMemo(
+    () => ({
+      category: search.category ?? "",
+      location: search.location ?? "",
+      startDate: search.startDate ?? "",
+      endDate: search.endDate ?? "",
+      sortBy: (search.sortBy ?? "NEW") as SortOption,
+    }),
+    [search.category, search.location, search.startDate, search.endDate, search.sortBy],
+  );
+
+  const { data, isLoading, isError, isFetching, refetch } = useEvents(page - 1, PAGE_SIZE, filters);
 
   const categoryFilter = search.category ?? "";
   const locationFilter = search.location ?? "";
@@ -50,17 +56,7 @@ export function EventsListPage() {
   const endDateFilter = search.endDate ?? "";
   const sortBy = (search.sortBy ?? "NEW") as SortOption;
 
-  useEffect(() => {
-    setPage(0);
-  }, [categoryFilter, locationFilter, startDateFilter, endDateFilter, sortBy]);
-
   const totalPages = Math.max(1, data?.totalPages ?? 1);
-
-  useEffect(() => {
-    if (page >= totalPages) {
-      setPage(0);
-    }
-  }, [page, totalPages]);
 
   const hasActiveFilters =
     categoryFilter.length > 0 ||
@@ -74,10 +70,12 @@ export function EventsListPage() {
     endOfDay(startDateFilter) > endOfDay(endDateFilter);
 
   function updateSearch(patch: Partial<typeof search>) {
+    const nextPage = patch.page ?? 1;
     void navigate({
       to: "/events",
       replace: true,
       search: {
+        page: nextPage,
         category: patch.category ?? categoryFilter,
         location: patch.location ?? locationFilter,
         startDate: patch.startDate ?? startDateFilter,
@@ -89,6 +87,7 @@ export function EventsListPage() {
 
   function clearFilters() {
     updateSearch({
+      page: 1,
       category: "",
       location: "",
       startDate: "",
@@ -116,9 +115,7 @@ export function EventsListPage() {
         </Box>
         {role === "ORGANIZER" && (
           <Button
-            onClick={() =>
-              navigate({ to: "/events/new", search: { returnTo: "/events" } })
-            }
+            onClick={() => navigate({ to: "/events/new", search: { returnTo: "/events" } })}
             variant="contained"
             size="large"
           >
@@ -139,7 +136,7 @@ export function EventsListPage() {
             labelId="event-category-filter-label"
             value={categoryFilter}
             label="Category"
-            onChange={(e) => updateSearch({ category: e.target.value })}
+            onChange={(e) => updateSearch({ page: 1, category: e.target.value })}
           >
             <MenuItem value="">All categories</MenuItem>
             {categoryOptions.map((category) => (
@@ -154,7 +151,7 @@ export function EventsListPage() {
           size="small"
           label="Location"
           value={locationFilter}
-          onChange={(e) => updateSearch({ location: e.target.value })}
+          onChange={(e) => updateSearch({ page: 1, location: e.target.value })}
           placeholder="Search by venue"
           sx={{ minWidth: { xs: "100%", md: 220 } }}
         />
@@ -164,7 +161,7 @@ export function EventsListPage() {
           label="Start date"
           type="date"
           value={startDateFilter}
-          onChange={(e) => updateSearch({ startDate: e.target.value })}
+          onChange={(e) => updateSearch({ page: 1, startDate: e.target.value })}
           InputLabelProps={{ shrink: true }}
           sx={{ minWidth: { xs: "100%", md: 180 } }}
         />
@@ -174,7 +171,7 @@ export function EventsListPage() {
           label="End date"
           type="date"
           value={endDateFilter}
-          onChange={(e) => updateSearch({ endDate: e.target.value })}
+          onChange={(e) => updateSearch({ page: 1, endDate: e.target.value })}
           InputLabelProps={{ shrink: true }}
           sx={{ minWidth: { xs: "100%", md: 180 } }}
         />
@@ -185,9 +182,7 @@ export function EventsListPage() {
             labelId="event-sort-label"
             value={sortBy}
             label="Sort by"
-            onChange={(e) =>
-              updateSearch({ sortBy: e.target.value as SortOption })
-            }
+            onChange={(e) => updateSearch({ page: 1, sortBy: e.target.value as SortOption })}
           >
             <MenuItem value="NEW">New</MenuItem>
             <MenuItem value="PRICE_ASC">Price ascending</MenuItem>
@@ -224,6 +219,14 @@ export function EventsListPage() {
         </Alert>
       )}
 
+      {isFetching && !isLoading && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" color="text.secondary">
+            Updating results...
+          </Typography>
+        </Box>
+      )}
+
       {isLoading ? (
         <Grid container spacing={3}>
           {Array.from({ length: 6 }).map((_, i) => (
@@ -252,34 +255,6 @@ export function EventsListPage() {
             </Button>
           )}
         </Box>
-      ) : data && data.content.length === 0 && hasActiveFilters ? (
-        <Box sx={{ textAlign: "center", py: 10 }}>
-          <Typography variant="h3" gutterBottom>
-            No matching events.
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Try changing the date range, category, or location filters.
-          </Typography>
-          <Button variant="outlined" onClick={clearFilters}>
-            Clear filters
-          </Button>
-        </Box>
-      ) : data && data.content.length === 0 ? (
-        <Box sx={{ textAlign: "center", py: 10 }}>
-          <Typography variant="h3" gutterBottom>
-            No upcoming events yet.
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            {role === "ORGANIZER"
-              ? "Be the first — create an event to get started."
-              : "Check back soon."}
-          </Typography>
-          {role === "ORGANIZER" && (
-            <Button component={Link} to="/events/new" variant="contained">
-              Create event
-            </Button>
-          )}
-        </Box>
       ) : data ? (
         <>
           <Grid container spacing={3}>
@@ -293,8 +268,8 @@ export function EventsListPage() {
             <Stack alignItems="center" sx={{ mt: 6 }}>
               <Pagination
                 count={totalPages}
-                page={page + 1}
-                onChange={(_, next) => setPage(next - 1)}
+                page={page}
+                onChange={(_, next) => updateSearch({ page: next })}
                 color="primary"
               />
             </Stack>

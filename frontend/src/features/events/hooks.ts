@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   claimFreeTickets,
   createCheckoutPaymentIntent,
@@ -20,6 +20,7 @@ export function useEvents(page: number, size = 12, filters: EventListFilters) {
   return useQuery({
     queryKey: ['events', { page, size, filters }],
     queryFn: () => fetchEvents(page, size, filters),
+    placeholderData: keepPreviousData,
   })
 }
 

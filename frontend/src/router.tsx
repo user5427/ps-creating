@@ -22,6 +22,8 @@ function parseEventFormSearch(search: Record<string, unknown>) {
 }
 
 function parseEventsListSearch(search: Record<string, unknown>) {
+  const pageValue = Number(search.page)
+  const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1
   const category = typeof search.category === 'string' ? search.category : undefined
   const location = typeof search.location === 'string' ? search.location : undefined
   const startDate = typeof search.startDate === 'string' ? search.startDate : undefined
@@ -29,10 +31,11 @@ function parseEventsListSearch(search: Record<string, unknown>) {
   const sortBy =
     search.sortBy === 'PRICE_ASC' || search.sortBy === 'PRICE_DESC' ? search.sortBy : 'NEW'
 
-  return { category, location, startDate, endDate, sortBy }
+  return { page, category, location, startDate, endDate, sortBy }
 }
 
 export const defaultEventsSearch = {
+  page: 1,
   category: undefined,
   location: undefined,
   startDate: undefined,
