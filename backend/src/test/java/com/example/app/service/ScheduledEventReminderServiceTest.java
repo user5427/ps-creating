@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ScheduledEventReminderServiceTest {
@@ -31,6 +31,9 @@ class ScheduledEventReminderServiceTest {
     @Mock
     private TicketEmailService ticketEmailService;
 
+        @Mock
+        private TwilioService twilioService;
+
     @InjectMocks
     private ScheduledEventReminderService service;
 
@@ -38,11 +41,10 @@ class ScheduledEventReminderServiceTest {
     private Event publishedEvent;
     private Event cancelledEvent;
     private Code ticketForPublished;
-    private Code ticketForCancelled;
 
     @BeforeEach
     void setUp() {
-        attendee = new User(UUID.randomUUID(), "attendee@example.com", "John", "Doe", Role.ATTENDEE);
+                attendee = new User(UUID.randomUUID(), "attendee@example.com", "John", "Doe", "+15555550123", Role.ATTENDEE);
 
         publishedEvent = new Event("Live Concert", "Great music", "Music", "Grand Hall", null,
                 OffsetDateTime.now().plusHours(24).plusMinutes(30), // starts in ~24h30m
@@ -55,12 +57,11 @@ class ScheduledEventReminderServiceTest {
         cancelledEvent.setStatus(EventStatus.CANCELLED);
 
         ticketForPublished = new Code(UUID.randomUUID(), attendee, publishedEvent);
-        ticketForCancelled = new Code(UUID.randomUUID(), attendee, cancelledEvent);
     }
 
     /**
      * Acceptance Criteria 1: Given attendee has ticket for upcoming event,
-     * when event is 24 hours away, then reminder email is sent with event
+     * when event is 24 hours away, then reminder email and SMS are sent with event
      * details (name, date, time, venue).
      */
     @Test
@@ -72,6 +73,7 @@ class ScheduledEventReminderServiceTest {
 
         ArgumentCaptor<EventReminderEmail> captor = ArgumentCaptor.forClass(EventReminderEmail.class);
         verify(ticketEmailService, times(1)).sendEventReminder(captor.capture());
+        verify(twilioService, times(1)).sendSMS(eq("+15555550123"), contains("Live Concert"));
 
         EventReminderEmail sent = captor.getValue();
         assertEquals("attendee@example.com", sent.recipientEmail());
@@ -140,8 +142,9 @@ class ScheduledEventReminderServiceTest {
         // Should not throw, should continue
         service.sendReminders();
 
-        // Both emails should still be attempted
+        // Both reminders should still be attempted
         verify(ticketEmailService, times(2)).sendEventReminder(any(EventReminderEmail.class));
+        verify(twilioService, times(2)).sendSMS(anyString(), anyString());
     }
 
     /**
@@ -160,5 +163,20 @@ class ScheduledEventReminderServiceTest {
 
         // Email should not be sent for null event
         verify(ticketEmailService, never()).sendEventReminder(any());
+                verify(twilioService, never()).sendSMS(anyString(), anyString());
     }
+
+        @Test
+        void testSkipsSmsWhenPhoneNumberMissing() {
+                User attendeeWithoutPhone = new User(UUID.randomUUID(), "nophone@example.com", "John", "Doe", null, Role.ATTENDEE);
+                Code ticketWithoutPhone = new Code(UUID.randomUUID(), attendeeWithoutPhone, publishedEvent);
+
+                when(codeRepository.findCodesForEventStartBetween(any(OffsetDateTime.class), any(OffsetDateTime.class)))
+                                .thenReturn(List.of(ticketWithoutPhone));
+
+                service.sendReminders();
+
+                verify(ticketEmailService, times(1)).sendEventReminder(any(EventReminderEmail.class));
+                verify(twilioService, never()).sendSMS(anyString(), anyString());
+        }
 }
