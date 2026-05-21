@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Alert,
   Box,
@@ -16,134 +16,47 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useAppStore } from "../../../store/appStore";
 import { EventCard } from "../components/EventCard";
-import { useEvents } from "../hooks";
-import type { EventResponse } from "../schemas";
+import { useEventCategories, useEvents } from "../hooks";
 
 const PAGE_SIZE = 12;
-const CATALOG_FETCH_SIZE = 500;
 
 type SortOption = "NEW" | "PRICE_ASC" | "PRICE_DESC";
-
-function startOfDay(dateInput: string) {
-  return new Date(`${dateInput}T00:00:00`).getTime();
-}
 
 function endOfDay(dateInput: string) {
   return new Date(`${dateInput}T23:59:59.999`).getTime();
 }
 
-function applyFilters(
-  events: EventResponse[],
-  filters: {
-    category: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-  },
-) {
-  const category = filters.category.trim().toLowerCase();
-  const location = filters.location.trim().toLowerCase();
-  const hasStartDate = filters.startDate.length > 0;
-  const hasEndDate = filters.endDate.length > 0;
-  const startTs = hasStartDate ? startOfDay(filters.startDate) : null;
-  const endTs = hasEndDate ? endOfDay(filters.endDate) : null;
-
-  return events.filter((event) => {
-    const eventStartTs = new Date(event.startTime).getTime();
-
-    if (category && event.category.trim().toLowerCase() !== category) {
-      return false;
-    }
-
-    if (location && !event.venue.toLowerCase().includes(location)) {
-      return false;
-    }
-
-    if (startTs !== null && eventStartTs < startTs) {
-      return false;
-    }
-
-    if (endTs !== null && eventStartTs > endTs) {
-      return false;
-    }
-
-    return true;
-  });
-}
-
-function applySort(events: EventResponse[], sortBy: SortOption) {
-  return [...events].sort((a, b) => {
-    if (sortBy === "PRICE_ASC") {
-      return a.price - b.price;
-    }
-
-    if (sortBy === "PRICE_DESC") {
-      return b.price - a.price;
-    }
-
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
-}
-
 export function EventsListPage() {
-  const [page, setPage] = useState(0);
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
-  const [startDateFilter, setStartDateFilter] = useState("");
-  const [endDateFilter, setEndDateFilter] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("NEW");
+  const navigate = useNavigate();
+  const search = useSearch({ from: "/events" });
+  const page = search.page ?? 1;
 
   const role = useAppStore((s) => s.role);
-  const { data, isLoading, isError, refetch } = useEvents(
-    0,
-    CATALOG_FETCH_SIZE,
+  const { data: categoryOptions = [] } = useEventCategories();
+
+  const filters = useMemo(
+    () => ({
+      category: search.category ?? "",
+      location: search.location ?? "",
+      startDate: search.startDate ?? "",
+      endDate: search.endDate ?? "",
+      sortBy: (search.sortBy ?? "NEW") as SortOption,
+    }),
+    [search.category, search.location, search.startDate, search.endDate, search.sortBy],
   );
 
-  const categoryOptions = useMemo(
-    () =>
-      Array.from(
-        new Set((data?.content ?? []).map((event) => event.category)),
-      ).sort((a, b) => a.localeCompare(b)),
-    [data],
-  );
+  const { data, isLoading, isError, isFetching, refetch } = useEvents(page - 1, PAGE_SIZE, filters);
 
-  const filteredAndSortedEvents = useMemo(() => {
-    if (!data) {
-      return [];
-    }
+  const categoryFilter = search.category ?? "";
+  const locationFilter = search.location ?? "";
+  const startDateFilter = search.startDate ?? "";
+  const endDateFilter = search.endDate ?? "";
+  const sortBy = (search.sortBy ?? "NEW") as SortOption;
 
-    const filtered = applyFilters(data.content, {
-      category: categoryFilter,
-      location: locationFilter,
-      startDate: startDateFilter,
-      endDate: endDateFilter,
-    });
-
-    return applySort(filtered, sortBy);
-  }, [
-    data,
-    categoryFilter,
-    locationFilter,
-    startDateFilter,
-    endDateFilter,
-    sortBy,
-  ]);
-
-  useEffect(() => {
-    setPage(0);
-  }, [categoryFilter, locationFilter, startDateFilter, endDateFilter, sortBy]);
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredAndSortedEvents.length / PAGE_SIZE),
-  );
-  const pagedEvents = filteredAndSortedEvents.slice(
-    page * PAGE_SIZE,
-    page * PAGE_SIZE + PAGE_SIZE,
-  );
+  const totalPages = Math.max(1, data?.totalPages ?? 1);
 
   const hasActiveFilters =
     categoryFilter.length > 0 ||
@@ -156,12 +69,31 @@ export function EventsListPage() {
     endDateFilter.length > 0 &&
     endOfDay(startDateFilter) > endOfDay(endDateFilter);
 
+  function updateSearch(patch: Partial<typeof search>) {
+    const nextPage = patch.page ?? 1;
+    void navigate({
+      to: "/events",
+      replace: true,
+      search: {
+        page: nextPage,
+        category: patch.category ?? categoryFilter,
+        location: patch.location ?? locationFilter,
+        startDate: patch.startDate ?? startDateFilter,
+        endDate: patch.endDate ?? endDateFilter,
+        sortBy: (patch.sortBy ?? sortBy) as SortOption,
+      },
+    });
+  }
+
   function clearFilters() {
-    setCategoryFilter("");
-    setLocationFilter("");
-    setStartDateFilter("");
-    setEndDateFilter("");
-    setSortBy("NEW");
+    updateSearch({
+      page: 1,
+      category: "",
+      location: "",
+      startDate: "",
+      endDate: "",
+      sortBy: "NEW",
+    });
   }
 
   return (
@@ -183,9 +115,7 @@ export function EventsListPage() {
         </Box>
         {role === "ORGANIZER" && (
           <Button
-            component={Link}
-            to="/events/new"
-            search={{ returnTo: '/events' }}
+            onClick={() => navigate({ to: "/events/new", search: { returnTo: "/events" } })}
             variant="contained"
             size="large"
           >
@@ -206,7 +136,7 @@ export function EventsListPage() {
             labelId="event-category-filter-label"
             value={categoryFilter}
             label="Category"
-            onChange={(e) => setCategoryFilter(e.target.value)}
+            onChange={(e) => updateSearch({ page: 1, category: e.target.value })}
           >
             <MenuItem value="">All categories</MenuItem>
             {categoryOptions.map((category) => (
@@ -221,7 +151,7 @@ export function EventsListPage() {
           size="small"
           label="Location"
           value={locationFilter}
-          onChange={(e) => setLocationFilter(e.target.value)}
+          onChange={(e) => updateSearch({ page: 1, location: e.target.value })}
           placeholder="Search by venue"
           sx={{ minWidth: { xs: "100%", md: 220 } }}
         />
@@ -231,7 +161,7 @@ export function EventsListPage() {
           label="Start date"
           type="date"
           value={startDateFilter}
-          onChange={(e) => setStartDateFilter(e.target.value)}
+          onChange={(e) => updateSearch({ page: 1, startDate: e.target.value })}
           InputLabelProps={{ shrink: true }}
           sx={{ minWidth: { xs: "100%", md: 180 } }}
         />
@@ -241,7 +171,7 @@ export function EventsListPage() {
           label="End date"
           type="date"
           value={endDateFilter}
-          onChange={(e) => setEndDateFilter(e.target.value)}
+          onChange={(e) => updateSearch({ page: 1, endDate: e.target.value })}
           InputLabelProps={{ shrink: true }}
           sx={{ minWidth: { xs: "100%", md: 180 } }}
         />
@@ -252,7 +182,7 @@ export function EventsListPage() {
             labelId="event-sort-label"
             value={sortBy}
             label="Sort by"
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            onChange={(e) => updateSearch({ page: 1, sortBy: e.target.value as SortOption })}
           >
             <MenuItem value="NEW">New</MenuItem>
             <MenuItem value="PRICE_ASC">Price ascending</MenuItem>
@@ -289,6 +219,14 @@ export function EventsListPage() {
         </Alert>
       )}
 
+      {isFetching && !isLoading && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" color="text.secondary">
+            Updating results...
+          </Typography>
+        </Box>
+      )}
+
       {isLoading ? (
         <Grid container spacing={3}>
           {Array.from({ length: 6 }).map((_, i) => (
@@ -308,8 +246,8 @@ export function EventsListPage() {
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             {role === "ORGANIZER"
-              ? "Be the first — create an event to get started."
-              : "Check back soon."}
+              ? "Be the first - why not create your own event?"
+              : "Check back soon for new AWESOME events."}
           </Typography>
           {role === "ORGANIZER" && (
             <Button component={Link} to="/events/new" variant="contained">
@@ -317,22 +255,10 @@ export function EventsListPage() {
             </Button>
           )}
         </Box>
-      ) : data && filteredAndSortedEvents.length === 0 ? (
-        <Box sx={{ textAlign: "center", py: 10 }}>
-          <Typography variant="h3" gutterBottom>
-            No matching events.
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Try changing the date range, category, or location filters.
-          </Typography>
-          <Button variant="outlined" onClick={clearFilters}>
-            Clear filters
-          </Button>
-        </Box>
       ) : data ? (
         <>
           <Grid container spacing={3}>
-            {pagedEvents.map((event) => (
+            {data.content.map((event) => (
               <Grid item xs={12} sm={6} md={4} key={event.id}>
                 <EventCard event={event} />
               </Grid>
@@ -342,8 +268,8 @@ export function EventsListPage() {
             <Stack alignItems="center" sx={{ mt: 6 }}>
               <Pagination
                 count={totalPages}
-                page={page + 1}
-                onChange={(_, next) => setPage(next - 1)}
+                page={page}
+                onChange={(_, next) => updateSearch({ page: next })}
                 color="primary"
               />
             </Stack>

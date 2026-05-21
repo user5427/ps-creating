@@ -7,6 +7,7 @@ import com.example.app.api.event.UpdateEventRequest;
 import com.example.app.web.ActorContext;
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +28,17 @@ public class EventController {
     }
 
     @GetMapping
-    public Page<EventResponse> list(@PageableDefault(size = 12) Pageable pageable) {
-        return eventService.listUpcoming(pageable);
+    public Page<EventResponse> list(@PageableDefault(size = 12, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable,
+                                    @RequestParam(required = false) String category,
+                                    @RequestParam(required = false) String location,
+                                    @RequestParam(required = false) LocalDate startDate,
+                                    @RequestParam(required = false) LocalDate endDate) {
+        return eventService.listUpcoming(category, location, startDate, endDate, pageable);
+    }
+
+    @GetMapping("/categories")
+    public java.util.List<String> listCategories() {
+        return eventService.listUpcomingCategories();
     }
 
     @GetMapping("/me")

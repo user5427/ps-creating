@@ -5,11 +5,14 @@ import com.example.app.api.event.EventDashboardResponse;
 import com.example.app.api.event.EventResponse;
 import com.example.app.api.event.UpdateEventRequest;
 import com.example.app.aspect.Audited;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,10 +31,36 @@ public class DefaultEventService implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<EventResponse> listUpcoming(Pageable pageable) {
+    public Page<EventResponse> listUpcoming(String category,
+                                            String location,
+                                            LocalDate startDate,
+                                            LocalDate endDate,
+                                            Pageable pageable) {
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime startDateTime = startDate == null
+            ? null
+            : startDate.atStartOfDay().atOffset(now.getOffset());
+        OffsetDateTime endDateTime = endDate == null
+            ? null
+            : endDate.atTime(LocalTime.MAX).atOffset(now.getOffset());
+
         return eventRepository
-                .findUpcoming(EventStatus.PUBLISHED, OffsetDateTime.now(), pageable)
+            .findAll(
+                upcomingSpecification(
+                    EventStatus.PUBLISHED,
+                    now,
+                    normalize(category),
+                    normalize(location),
+                    startDateTime,
+                    endDateTime),
+                pageable)
                 .map(eventMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.List<String> listUpcomingCategories() {
+        return eventRepository.findUpcomingCategories(EventStatus.PUBLISHED, OffsetDateTime.now());
     }
 
     @Override
@@ -126,5 +155,52 @@ public class DefaultEventService implements EventService {
         event.setEndTime(request.endTime());
         event.setCapacity(request.capacity());
         event.setPrice(request.price());
+    }
+
+    private static String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private static Specification<Event> upcomingSpecification(EventStatus status,
+                                                              OffsetDateTime from,
+                                                              String category,
+                                                              String location,
+                                                              OffsetDateTime startDateTime,
+                                                              OffsetDateTime endDateTime) {
+        return (root, query, cb) -> {
+            var predicates = cb.conjunction();
+
+            predicates = cb.and(predicates, cb.equal(root.get("status"), status));
+            predicates = cb.and(predicates, cb.greaterThanOrEqualTo(root.get("startTime"), from));
+
+            if (category != null) {
+                predicates = cb.and(
+                        predicates,
+                        cb.equal(cb.lower(root.get("category")), category.toLowerCase())
+                );
+            }
+
+            if (location != null) {
+                predicates = cb.and(
+                        predicates,
+                        cb.like(cb.lower(root.get("venue")), "%" + location.toLowerCase() + "%")
+                );
+            }
+
+            if (startDateTime != null) {
+                predicates = cb.and(predicates, cb.greaterThanOrEqualTo(root.get("startTime"), startDateTime));
+            }
+
+            if (endDateTime != null) {
+                predicates = cb.and(predicates, cb.lessThanOrEqualTo(root.get("startTime"), endDateTime));
+            }
+
+            return predicates;
+        };
     }
 }

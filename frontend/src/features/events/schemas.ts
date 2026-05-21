@@ -53,6 +53,8 @@ export const PageSchema = <T extends z.ZodTypeAny>(inner: T) =>
     totalPages: z.number().int().nonnegative(),
   })
 
+export const EventCategoryListSchema = z.array(z.string())
+
 export type Page<T> = {
   content: T[]
   number: number
