@@ -31,9 +31,8 @@ class ScheduledEventReminderServiceTest {
     @Mock
     private TicketEmailService ticketEmailService;
 
-        @Mock
-        private TwilioService twilioService;
-
+    @Mock
+    private TwilioService twilioService;
     @InjectMocks
     private ScheduledEventReminderService service;
 
@@ -41,10 +40,11 @@ class ScheduledEventReminderServiceTest {
     private Event publishedEvent;
     private Event cancelledEvent;
     private Code ticketForPublished;
+    private Code ticketForCancelled;
 
     @BeforeEach
     void setUp() {
-                attendee = new User(UUID.randomUUID(), "attendee@example.com", "John", "Doe", "+15555550123", Role.ATTENDEE);
+        attendee = new User(UUID.randomUUID(), "attendee@example.com", "John", "Doe", "+15555550123", Role.ATTENDEE);
 
         publishedEvent = new Event("Live Concert", "Great music", "Music", "Grand Hall", null,
                 OffsetDateTime.now().plusHours(24).plusMinutes(30), // starts in ~24h30m
@@ -57,6 +57,7 @@ class ScheduledEventReminderServiceTest {
         cancelledEvent.setStatus(EventStatus.CANCELLED);
 
         ticketForPublished = new Code(UUID.randomUUID(), attendee, publishedEvent);
+        ticketForCancelled = new Code(UUID.randomUUID(), attendee, cancelledEvent);
     }
 
     /**
@@ -163,20 +164,20 @@ class ScheduledEventReminderServiceTest {
 
         // Email should not be sent for null event
         verify(ticketEmailService, never()).sendEventReminder(any());
-                verify(twilioService, never()).sendSMS(anyString(), anyString());
+        verify(twilioService, never()).sendSMS(anyString(), anyString());
     }
 
-        @Test
-        void testSkipsSmsWhenPhoneNumberMissing() {
-                User attendeeWithoutPhone = new User(UUID.randomUUID(), "nophone@example.com", "John", "Doe", null, Role.ATTENDEE);
-                Code ticketWithoutPhone = new Code(UUID.randomUUID(), attendeeWithoutPhone, publishedEvent);
+    @Test
+    void testSkipsSmsWhenPhoneNumberMissing() {
+        User attendeeWithoutPhone = new User(UUID.randomUUID(), "nophone@example.com", "John", "Doe", null, Role.ATTENDEE);
+        Code ticketWithoutPhone = new Code(UUID.randomUUID(), attendeeWithoutPhone, publishedEvent);
 
-                when(codeRepository.findCodesForEventStartBetween(any(OffsetDateTime.class), any(OffsetDateTime.class)))
-                                .thenReturn(List.of(ticketWithoutPhone));
+        when(codeRepository.findCodesForEventStartBetween(any(OffsetDateTime.class), any(OffsetDateTime.class)))
+                .thenReturn(List.of(ticketWithoutPhone));
 
-                service.sendReminders();
+        service.sendReminders();
 
-                verify(ticketEmailService, times(1)).sendEventReminder(any(EventReminderEmail.class));
-                verify(twilioService, never()).sendSMS(anyString(), anyString());
-        }
+        verify(ticketEmailService, times(1)).sendEventReminder(any(EventReminderEmail.class));
+        verify(twilioService, never()).sendSMS(anyString(), anyString());
+    }
 }

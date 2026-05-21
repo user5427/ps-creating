@@ -44,8 +44,9 @@ public class ScheduledEventReminderService {
 
         List<Code> codes = codeRepository.findCodesForEventStartBetween(windowStart, windowEnd);
         for (Code code : codes) {
-            if (code.getEvent() == null || code.getUser() == null)
+            if (code.getEvent() == null || code.getUser() == null) {
                 continue;
+            }
 
             boolean sent = false;
             try {
