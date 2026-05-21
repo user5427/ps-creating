@@ -24,6 +24,8 @@ Email (for ticket confirmation with QR code):
 - `MAIL_SMTP_STARTTLS_ENABLE` - `true`/`false`
 - `MAIL_FROM` - sender email address
 
+SMS reminders use the existing Twilio setup. Attendee records must include a phone number in E.164 format, for example `+15555550123`, or SMS reminders will be skipped for that user.
+
 ### Database
 
 PostgreSQL is automatically configured to connect to the Docker Compose instance:
