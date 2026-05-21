@@ -56,6 +56,37 @@ public class SmtpTicketEmailService implements TicketEmailService {
         }
     }
 
+    @Override
+    public void sendEventReminder(EventReminderEmail reminder) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
+
+            helper.setFrom(Objects.requireNonNull(fromAddress));
+            helper.setTo(Objects.requireNonNull(reminder.recipientEmail()));
+            helper.setSubject("Event reminder: " + reminder.eventTitle());
+
+            String start = DATE_FORMAT.format(reminder.eventStartTime());
+            String htmlBody = """
+                    <html>
+                      <body style=\"font-family: Arial, sans-serif; color: #1f2937;\">
+                        <h2>Event reminder</h2>
+                        <p>Hello %s,</p>
+                        <p>This is a tiny reminder that you have a ticket for the following event happening in right about 24 hours:</p>
+                                                <p><strong>Event:</strong> %s</p>
+                        <p><strong>Venue:</strong> %s</p>
+                        <p><strong>Start time:</strong> %s</p>
+                      </body>
+                    </html>
+                    """.formatted(reminder.recipientFirstName(), reminder.eventTitle(), reminder.eventVenue(), start);
+
+            helper.setText(htmlBody, true);
+            mailSender.send(message);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to send event reminder email", ex);
+        }
+    }
+
     private static String buildHtmlBody(TicketConfirmationEmail confirmation, String qrDataUri) {
         String start = DATE_FORMAT.format(confirmation.eventStartTime());
         return """

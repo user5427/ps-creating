@@ -133,6 +133,17 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
         }
         codeRepository.saveAll(createdCodes);
 
+        for (Code code : createdCodes) {
+            eventPublisher.publishEvent(new TicketPurchaseConfirmedEvent(
+                    attendee.getEmail(),
+                    attendee.getFirstName(),
+                    event.getTitle(),
+                    event.getVenue(),
+                    event.getStartTime(),
+                    code.getId(),
+                    code.getId().toString()));
+        }
+
         event.setSeatsSold(event.getSeatsSold() + quantity);
         eventRepository.save(event);
         eventServiceDecorator.invalidateListCache();
