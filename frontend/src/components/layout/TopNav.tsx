@@ -71,6 +71,14 @@ export function TopNav() {
               </ToggleButtonGroup>
             </Box>
           )}
+          <Button color="inherit" onClick={() => navigate({ to: '/login' })}>
+            Login
+          </Button>
+
+          <Button color="inherit" onClick={() => navigate({ to: '/register' })}>
+            Register
+          </Button>
+
           <Button
             variant="contained"
             onClick={() => navigate({ to: '/events' })}

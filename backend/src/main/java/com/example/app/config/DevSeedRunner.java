@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class DevSeedRunner implements CommandLineRunner {
     private final EventRepository eventRepository;
     private final UUID organizerId;
     private final UUID attendeeId;
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -43,11 +45,13 @@ public class DevSeedRunner implements CommandLineRunner {
     public DevSeedRunner(UserRepository userRepository,
                          EventRepository eventRepository,
                          @Value("${app.dev.organizer-id}") UUID organizerId,
-                         @Value("${app.dev.attendee-id}") UUID attendeeId) {
+                         @Value("${app.dev.attendee-id}") UUID attendeeId,
+                         PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.organizerId = organizerId;
         this.attendeeId = attendeeId;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -61,12 +65,16 @@ public class DevSeedRunner implements CommandLineRunner {
         // Use EntityManager.persist() directly: with a pre-assigned UUID,
         // Spring Data's save() would call merge() and then choke because the
         // @Version field is null on a "detached-looking" entity.
+        // Hash the dev seed password using the application's PasswordEncoder
+        final String devPlainPassword = "1234";
+        final String hashed = passwordEncoder.encode(devPlainPassword);
+
         if (userRepository.findById(organizerId).isEmpty()) {
-            entityManager.persist(new User(organizerId, "organizer@demo.test", "Tomas", "Žilinskas", Role.ORGANIZER));
+            entityManager.persist(new User(organizerId, "organizer@demo.test", hashed, "Tomas", "Žilinskas", Role.ORGANIZER));
             log.info("Seeded organizer {}", organizerId);
         }
         if (userRepository.findById(attendeeId).isEmpty()) {
-            entityManager.persist(new User(attendeeId, "attendee@demo.test", "Eglė", "Kazlauskaitė", Role.ATTENDEE));
+            entityManager.persist(new User(attendeeId, "attendee@demo.test", hashed, "Eglė", "Kazlauskaitė", Role.ATTENDEE));
             log.info("Seeded attendee {}", attendeeId);
         }
     }

@@ -26,11 +26,19 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // Allow CORS for API endpoints and auth endpoints used by the SPA
         registry.addMapping("/api/**")
                 .allowedOrigins(allowedOrigin)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .exposedHeaders("Location")
+                .allowCredentials(true)
+                .maxAge(3600);
+
+        registry.addMapping("/auth/**")
+                .allowedOrigins(allowedOrigin)
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
     }

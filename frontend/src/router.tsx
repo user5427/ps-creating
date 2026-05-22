@@ -9,6 +9,9 @@ import { BookingSummaryPage } from './features/events/pages/BookingSummaryPage'
 import { CodeScanPage } from './features/code/pages/CodeScanPage'
 import { MyTicketsPage } from './features/code/pages/MyTicketsPage'
 import { MyTicketsEventPage } from './features/code/pages/MyTicketsEventPage'
+import { LoginPage } from "./features/auth/pages/LoginPage";
+import { RegisterPage } from "./features/auth/pages/RegisterPage";
+
 
 function parseCheckoutSearch(search: Record<string, unknown>) {
   const quantityValue = Number(search.quantity)
@@ -84,7 +87,6 @@ const myTicketsEventRoute = createRoute({
   component: MyTicketsEventPage,
 })
 
-<<<<<<< HEAD
 const myEventsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-events',
@@ -97,8 +99,18 @@ const eventDashboardRoute = createRoute({
   component: EventDashboardPage,
 })
 
-=======
->>>>>>> origin/main
+const loginRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/login",
+    component: LoginPage,
+});
+
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/register",
+  component: RegisterPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   eventsListRoute,
@@ -109,11 +121,10 @@ const routeTree = rootRoute.addChildren([
   codeScanRoute,
   myTicketsRoute,
   myTicketsEventRoute,
-<<<<<<< HEAD
   myEventsRoute,
   eventDashboardRoute,
-=======
->>>>>>> origin/main
+  loginRoute,
+  registerRoute
 ])
 
 export const router = createRouter({ routeTree })

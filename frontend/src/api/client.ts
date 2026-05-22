@@ -34,4 +34,16 @@ apiClient.interceptors.response.use(
   },
 )
 
+// Attach Authorization header when token is present in the app store
+apiClient.interceptors.request.use((config) => {
+  // cast to any to avoid circular-type resolution issues in TS
+  const token = (useAppStore.getState() as any).token
+  if (token) {
+    config.headers = config.headers ?? {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(config.headers as any)['Authorization'] = `Bearer ${token}`
+  }
+  return config
+})
+
 export default apiClient

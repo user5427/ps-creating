@@ -9,7 +9,7 @@ import {
     Stack,
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
-import { register } from "../api";
+import * as authApi from "../api";
 
 export function RegisterPage() {
     const navigate = useNavigate();
@@ -26,7 +26,7 @@ export function RegisterPage() {
         setError(null);
 
         try {
-            await register({ email, password, firstName, lastName });
+            await authApi.register({ email, password, firstName, lastName });
             // After successful registration redirect to login
             navigate({ to: "/login" });
         } catch (err: any) {
@@ -97,4 +97,5 @@ export function RegisterPage() {
         </Container>
     );
 }
+
 
