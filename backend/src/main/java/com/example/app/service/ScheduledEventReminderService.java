@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.util.StringUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,10 @@ public class ScheduledEventReminderService {
         this.twilioService = twilioService;
     }
 
-    // Run hourly and send reminders for events starting ~24 hours from now
+    // Run hourly and send reminders for events starting ~24 hours from now.
+    // @Async pushes the work off the scheduler thread so the cron tick returns immediately
+    // (quality requirement #6 — long ops must not block).
+    @Async("eventTaskExecutor")
     @Scheduled(cron = "0 0 * * * *")
     @Transactional(readOnly = true)
     public void sendReminders() {

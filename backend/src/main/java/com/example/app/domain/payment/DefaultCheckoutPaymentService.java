@@ -3,6 +3,7 @@ package com.example.app.domain.payment;
 import com.example.app.api.payment.ClaimFreeTicketsResponse;
 import com.example.app.api.payment.CheckoutPaymentStatusResponse;
 import com.example.app.api.payment.CreateCheckoutPaymentIntentResponse;
+import com.example.app.aspect.Audited;
 import com.example.app.domain.code.TicketPurchaseConfirmedEvent;
 import com.example.app.domain.code.Code;
 import com.example.app.domain.code.CodeRepository;
@@ -113,6 +114,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
     }
 
     @Override
+    @Audited("payment.claimFree")
     public ClaimFreeTicketsResponse claimFreeTickets(UUID eventId, UUID attendeeId, int quantity) {
         Event event = eventRepository.findByIdForUpdate(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
@@ -170,6 +172,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
     }
 
     @Override
+    @Audited("payment.handleSucceeded")
     public void handlePaymentSucceeded(String paymentIntentId) {
         checkoutPaymentRepository.findByPaymentIntentId(paymentIntentId)
                 .ifPresent(payment -> {
