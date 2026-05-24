@@ -1,5 +1,6 @@
 package com.example.app.domain.code;
 
+import com.example.app.aspect.Audited;
 import com.example.app.api.code.CodeResponse;
 import com.example.app.api.code.CodeEventResponse;
 import com.example.app.api.code.GenerateCodeRequest;
@@ -45,6 +46,7 @@ public class DefaultCodeService implements CodeService {
     }
 
     @Override
+    @Audited("code.generate")
     public CodeResponse generate(GenerateCodeRequest request) {
         UUID codeId = request.id() != null ? request.id() : UUID.randomUUID();
         if (codeRepository.existsById(Objects.requireNonNull(codeId))) {
@@ -61,6 +63,7 @@ public class DefaultCodeService implements CodeService {
     }
 
     @Override
+    @Audited("code.scan")
     public ScanCodeResponse scan(ScanCodeRequest request) {
         return codeQrUtils.extractCodeId(request.qrData())
                 .flatMap(codeRepository::findDetailedById)

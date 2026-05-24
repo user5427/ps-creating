@@ -15,7 +15,7 @@ public class TicketPurchaseConfirmationListener {
         this.ticketEmailService = ticketEmailService;
     }
 
-    @Async
+    @Async("eventTaskExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(TicketPurchaseConfirmedEvent event) {
         ticketEmailService.sendTicketConfirmation(new TicketConfirmationEmail(
