@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Container,
   Grid,
   Pagination,
@@ -11,7 +10,7 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { useAppStore } from '../../../store/appStore'
 import { useOrganizerEvents } from '../hooks'
 import { MyEventCard } from '../components/MyEventCard'
@@ -62,11 +61,9 @@ export function MyEventsPage() {
           </Typography>
         </Box>
         <Button
-          component={Link}
-          to="/events/new"
-          search={{ returnTo: '/my-events' }}
           variant="contained"
           size="large"
+          onClick={() => navigate({ to: '/events/new', search: { returnTo: '/my-events' } })}
         >
           Create event
         </Button>
@@ -105,7 +102,7 @@ export function MyEventsPage() {
           <Typography variant="h6" color="text.secondary">
             No events created yet
           </Typography>
-          <Button component={Link} to="/events/new" search={{ returnTo: '/my-events' }} variant="contained">
+          <Button variant="contained" onClick={() => navigate({ to: '/events/new', search: { returnTo: '/my-events' } })}>
             Create your first event
           </Button>
         </Stack>

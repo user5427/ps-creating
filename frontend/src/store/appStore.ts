@@ -22,6 +22,8 @@ interface AppState {
   logout: () => void
 }
 
+export const selectVisibleRole = (s: AppState): Role => (s.token && s.user ? (s.user.role as Role) : 'ATTENDEE')
+
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({

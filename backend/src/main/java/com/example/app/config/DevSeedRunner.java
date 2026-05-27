@@ -66,8 +66,7 @@ public class DevSeedRunner implements CommandLineRunner {
         // Spring Data's save() would call merge() and then choke because the
         // @Version field is null on a "detached-looking" entity.
         // Hash the dev seed password using the application's PasswordEncoder
-        final String devPlainPassword = "1234";
-        final String hashed = passwordEncoder.encode(devPlainPassword);
+        final String hashed = "$2a$10$nBlWWzCdMavPKm.jdZJBA.nf.oxPaH/VJt7wX6UhlcMLxElG2"; // "password" hashed with BCrypt
 
         if (userRepository.findById(organizerId).isEmpty()) {
             entityManager.persist(new User(organizerId, "organizer@demo.test", hashed, "Tomas", "Žilinskas", Role.ORGANIZER));

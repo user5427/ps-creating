@@ -106,7 +106,7 @@ export function EventFormPage({ mode }: Props) {
         navigate({ to: '/events/$eventId', params: { eventId: created.id } })
       } else if (eventId && existing) {
         const version = overwriteVersion ?? existing.version
-        const updated = await updateMutation.mutateAsync({ ...payload, version })
+        await updateMutation.mutateAsync({ ...payload, version })
         navigate({ to: returnTo as any })
       }
     } catch (err) {

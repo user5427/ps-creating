@@ -16,8 +16,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Link } from "@tanstack/react-router";
-import { useAppStore } from "../../../store/appStore";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { selectVisibleRole, useAppStore } from "../../../store/appStore";
 import { EventCard } from "../components/EventCard";
 import { useEvents } from "../hooks";
 import type { EventResponse } from "../schemas";
@@ -62,13 +62,9 @@ function applyFilters(
       return false;
     }
 
-    if (startTs !== null && eventStartTs < startTs) {
-      return false;
-    }
+    if (startTs !== null && eventStartTs < startTs) return false;
 
-    if (endTs !== null && eventStartTs > endTs) {
-      return false;
-    }
+    if (endTs !== null && eventStartTs > endTs) return false;
 
     return true;
   });
@@ -96,7 +92,8 @@ export function EventsListPage() {
   const [endDateFilter, setEndDateFilter] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("NEW");
 
-  const role = useAppStore((s) => s.role);
+  const role = useAppStore(selectVisibleRole);
+  const navigate = useNavigate();
   const { data, isLoading, isError, refetch } = useEvents(
     0,
     CATALOG_FETCH_SIZE,
@@ -183,11 +180,9 @@ export function EventsListPage() {
         </Box>
         {role === "ORGANIZER" && (
           <Button
-            component={Link}
-            to="/events/new"
-            search={{ returnTo: '/events' }}
             variant="contained"
             size="large"
+            onClick={() => navigate({ to: '/events/new', search: { returnTo: '/events' } })}
           >
             Create event
           </Button>

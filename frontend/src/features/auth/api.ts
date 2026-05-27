@@ -18,6 +18,7 @@ export type RegisterPayload = {
     password: string;
     firstName: string;
     lastName: string;
+    role?: 'ATTENDEE' | 'ORGANIZER'
 }
 
 export async function register(payload: RegisterPayload) {

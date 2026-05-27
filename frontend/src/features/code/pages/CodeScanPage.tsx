@@ -16,7 +16,7 @@ import { format } from 'date-fns'
 import { QRCodeSVG } from 'qrcode.react'
 import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useAppStore } from '../../../store/appStore'
+import { selectVisibleRole, useAppStore } from '../../../store/appStore'
 import { QrScannerDialog } from '../components/QrScannerDialog'
 import { useGenerateCode, useScanCode, useViewCode } from '../hooks'
 import {
@@ -76,7 +76,7 @@ function CodeCard({ title, code }: { title: string; code: CodeResponse }) {
 }
 
 export function CodeScanPage() {
-  const role = useAppStore((s) => s.role)
+  const role = useAppStore(selectVisibleRole)
   const isOrganizer = role === 'ORGANIZER'
 
   const [scannerOpen, setScannerOpen] = useState(false)
