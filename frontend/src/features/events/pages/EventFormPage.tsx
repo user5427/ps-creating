@@ -24,6 +24,7 @@ import {
   type EventResponse,
 } from '../schemas'
 import { useCreateEvent, useEvent, useUpdateEvent } from '../hooks'
+import { defaultEventsSearch } from '../../../router'
 
 type Mode = 'create' | 'edit'
 
@@ -154,7 +155,7 @@ export function EventFormPage({ mode }: Props) {
           severity={notFound ? 'warning' : 'error'}
           action={
             notFound ? (
-              <Button color="inherit" size="small" onClick={() => navigate({ to: '/events' })}>
+              <Button color="inherit" size="small" onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}>
                 Back to events
               </Button>
             ) : (

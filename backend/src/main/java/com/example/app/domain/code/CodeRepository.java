@@ -49,4 +49,8 @@ public interface CodeRepository extends JpaRepository<Code, UUID> {
 
     @EntityGraph(attributePaths = {"user", "event"})
     Page<Code> findByUserIdAndEventIdOrderByCreatedAtAsc(UUID userId, UUID eventId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "event"})
+    @Query("select c from Code c join c.event e where e.startTime >= :start and e.startTime < :end and e.status <> com.example.app.domain.event.EventStatus.CANCELLED")
+    java.util.List<Code> findCodesForEventStartBetween(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
 }

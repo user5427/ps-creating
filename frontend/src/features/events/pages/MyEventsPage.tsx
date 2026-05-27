@@ -14,6 +14,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useAppStore } from '../../../store/appStore'
 import { useOrganizerEvents } from '../hooks'
 import { MyEventCard } from '../components/MyEventCard'
+import { defaultEventsSearch } from '../../../router'
 
 const PAGE_SIZE = 12
 
@@ -25,7 +26,7 @@ export function MyEventsPage() {
 
   useEffect(() => {
     if (role !== 'ORGANIZER') {
-      navigate({ to: '/events' })
+      navigate({ to: '/events', search: defaultEventsSearch })
     }
   }, [role, navigate])
 
@@ -103,6 +104,10 @@ export function MyEventsPage() {
             No events created yet
           </Typography>
           <Button variant="contained" onClick={() => navigate({ to: '/events/new', search: { returnTo: '/my-events' } })}>
+          <Button
+            variant="contained"
+            onClick={() => navigate({ to: '/events/new', search: { returnTo: '/my-events' } })}
+          >
             Create your first event
           </Button>
         </Stack>

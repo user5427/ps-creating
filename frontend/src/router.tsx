@@ -26,6 +26,28 @@ function parseEventFormSearch(search: Record<string, unknown>) {
   return { returnTo }
 }
 
+function parseEventsListSearch(search: Record<string, unknown>) {
+  const pageValue = Number(search.page)
+  const page = Number.isInteger(pageValue) && pageValue > 0 ? pageValue : 1
+  const category = typeof search.category === 'string' ? search.category : undefined
+  const location = typeof search.location === 'string' ? search.location : undefined
+  const startDate = typeof search.startDate === 'string' ? search.startDate : undefined
+  const endDate = typeof search.endDate === 'string' ? search.endDate : undefined
+  const sortBy =
+    search.sortBy === 'PRICE_ASC' || search.sortBy === 'PRICE_DESC' ? search.sortBy : 'NEW'
+
+  return { page, category, location, startDate, endDate, sortBy }
+}
+
+export const defaultEventsSearch = {
+  page: 1,
+  category: undefined,
+  location: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  sortBy: 'NEW' as const,
+}
+
 const rootRoute = createRootRoute({
   component: RootLayout,
 })
@@ -34,13 +56,14 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
-    throw redirect({ to: '/events' })
+    throw redirect({ to: '/events', search: defaultEventsSearch })
   },
 })
 
 const eventsListRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events',
+  validateSearch: parseEventsListSearch,
   component: EventsListPage,
 })
 

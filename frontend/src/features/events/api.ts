@@ -3,6 +3,7 @@ import {
   CheckoutPaymentStatusResponseSchema,
   ClaimFreeTicketsResponseSchema,
   CreateCheckoutPaymentIntentResponseSchema,
+  EventCategoryListSchema,
   EventDashboardResponseSchema,
   EventResponseSchema,
   PageSchema,
@@ -30,6 +31,22 @@ export interface UpdateEventPayload extends CreateEventPayload {
   version: number
 }
 
+export type EventListSort = 'NEW' | 'PRICE_ASC' | 'PRICE_DESC'
+
+export interface EventListFilters {
+  category: string
+  location: string
+  startDate: string
+  endDate: string
+  sortBy: EventListSort
+}
+
+const SORT_TO_API: Record<EventListSort, string> = {
+  NEW: 'createdAt,desc',
+  PRICE_ASC: 'price,asc',
+  PRICE_DESC: 'price,desc',
+}
+
 export interface CreateCheckoutPaymentIntentPayload {
   quantity: number
 }
@@ -49,7 +66,28 @@ const BACKEND_ROOT = CONFIGURED_API.replace(/\/api\/?$/, '')
 export async function fetchEvents(page: number, size: number): Promise<Page<EventResponse>> {
   const url = `${BACKEND_ROOT}/api/events`
   const { data } = await apiClient.get(url, { params: { page, size } })
+export async function fetchEvents(
+  page: number,
+  size: number,
+  filters: EventListFilters,
+): Promise<Page<EventResponse>> {
+  const { data } = await apiClient.get('/events', {
+    params: {
+      page,
+      size,
+      category: filters.category || undefined,
+      location: filters.location || undefined,
+      startDate: filters.startDate || undefined,
+      endDate: filters.endDate || undefined,
+      sort: SORT_TO_API[filters.sortBy],
+    },
+  })
   return PageSchema(EventResponseSchema).parse(data)
+}
+
+export async function fetchEventCategories(): Promise<string[]> {
+  const { data } = await apiClient.get('/events/categories')
+  return EventCategoryListSchema.parse(data)
 }
 
 export async function fetchOrganizerEvents(

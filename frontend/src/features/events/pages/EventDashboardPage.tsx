@@ -25,6 +25,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn'
 import PeopleIcon from '@mui/icons-material/People'
 import { useAppStore } from '../../../store/appStore'
 import { useEvent } from '../hooks'
+import { defaultEventsSearch } from '../../../router'
 
 interface MetricCardProps {
   icon: React.ReactNode
@@ -66,7 +67,7 @@ export function EventDashboardPage() {
 
   useEffect(() => {
     if (role !== 'ORGANIZER') {
-      navigate({ to: '/events' })
+      navigate({ to: '/events', search: defaultEventsSearch })
     }
   }, [role, navigate])
 
