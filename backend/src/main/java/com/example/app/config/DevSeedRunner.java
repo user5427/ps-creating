@@ -39,10 +39,6 @@ public class DevSeedRunner implements CommandLineRunner {
     private final UUID organizerId;
     private final UUID attendeeId;
     private final PasswordEncoder passwordEncoder;
-        private final UserRepository userRepository;
-        private final EventRepository eventRepository;
-        private final UUID organizerId;
-        private final UUID attendeeId;
 
         @PersistenceContext
         private EntityManager entityManager;
@@ -58,15 +54,6 @@ public class DevSeedRunner implements CommandLineRunner {
         this.attendeeId = attendeeId;
         this.passwordEncoder = passwordEncoder;
     }
-        public DevSeedRunner(UserRepository userRepository,
-                        EventRepository eventRepository,
-                        @Value("${app.dev.organizer-id}") UUID organizerId,
-                        @Value("${app.dev.attendee-id}") UUID attendeeId) {
-                this.userRepository = userRepository;
-                this.eventRepository = eventRepository;
-                this.organizerId = organizerId;
-                this.attendeeId = attendeeId;
-        }
 
         @Override
         @Transactional
@@ -91,21 +78,6 @@ public class DevSeedRunner implements CommandLineRunner {
             log.info("Seeded attendee {}", attendeeId);
         }
     }
-        private void seedUsers() {
-                // Use EntityManager.persist() directly: with a pre-assigned UUID,
-                // Spring Data's save() would call merge() and then choke because the
-                // @Version field is null on a "detached-looking" entity.
-                if (userRepository.findById(Objects.requireNonNull(organizerId)).isEmpty()) {
-                        entityManager.persist(new User(organizerId, "organizer@demo.test", "Tomas", "Žilinskas", null,
-                                        Role.ORGANIZER));
-                        log.info("Seeded organizer {}", organizerId);
-                }
-                if (userRepository.findById(Objects.requireNonNull(attendeeId)).isEmpty()) {
-                        entityManager.persist(new User(attendeeId, "attendee@demo.test", "Eglė", "Kazlauskaitė",
-                                        "+15555550123", Role.ATTENDEE));
-                        log.info("Seeded attendee {}", attendeeId);
-                }
-        }
 
         private void seedEvents() {
                 if (eventRepository.count() > 0) {
