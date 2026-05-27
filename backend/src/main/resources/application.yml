@@ -59,8 +59,17 @@ app:
   dev: 
     organizer-id: 00000000-0000-0000-0000-000000000001
     attendee-id:  00000000-0000-0000-0000-000000000002
+  jwt:
+    # JWT secret used for HS256 signing. For local development this can be
+    # overridden with the APP_JWT_SECRET environment variable. Must be at
+    # least 32 bytes long.
+    secret: ${APP_JWT_SECRET:dev_jwt_secret_abcdefghijklmnopqrstuvwxyz_123456}
+    expiration-ms: ${APP_JWT_EXPIRATION_MS:86400000}
 
 logging:
   level:
     root: INFO
     com.example: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.jdbc.core: DEBUG

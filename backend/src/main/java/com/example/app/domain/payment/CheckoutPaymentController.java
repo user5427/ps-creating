@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api")
@@ -28,15 +29,15 @@ public class CheckoutPaymentController {
     }
 
     @PostMapping("/events/{eventId}/checkout/payment-intents")
+    @PreAuthorize("hasRole('ATTENDEE')")
     public CreateCheckoutPaymentIntentResponse createPaymentIntent(@PathVariable UUID eventId,
                                                                    @Valid @RequestBody CreateCheckoutPaymentIntentRequest request) {
-        requireAttendee();
         return checkoutPaymentService.createPaymentIntent(eventId, actorContext.getActorId(), request.quantity());
     }
 
     @PostMapping("/tickets/claim-free")
+    @PreAuthorize("hasRole('ATTENDEE')")
     public ClaimFreeTicketsResponse claimFree(@Valid @RequestBody ClaimFreeTicketsRequest request) {
-        requireAttendee();
         return checkoutPaymentService.claimFreeTickets(
                 request.eventId(),
                 actorContext.getActorId(),
@@ -48,9 +49,5 @@ public class CheckoutPaymentController {
         return checkoutPaymentService.status(paymentIntentId, actorContext.getActorId(), actorContext.isOrganizer());
     }
 
-    private void requireAttendee() {
-        if (actorContext.isOrganizer()) {
-            throw new CheckoutAccessDeniedException("Only attendees can purchase tickets");
-        }
-    }
+    
 }

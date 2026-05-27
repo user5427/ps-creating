@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/events")
@@ -42,8 +43,8 @@ public class EventController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasRole('ORGANIZER')")
     public Page<EventDashboardResponse> listMyEvents(@PageableDefault(size = 12) Pageable pageable) {
-        requireOrganizer();
         return eventService.listOrganizerEvents(actorContext.getActorId(), pageable);
     }
 
@@ -53,8 +54,8 @@ public class EventController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<EventResponse> create(@Valid @RequestBody CreateEventRequest request) {
-        requireOrganizer();
         EventResponse created = eventService.create(request, actorContext.getActorId());
         return ResponseEntity
                 .created(URI.create("/api/events/" + created.id()))
@@ -64,13 +65,7 @@ public class EventController {
     @PutMapping("/{id}")
     public EventResponse update(@PathVariable UUID id,
                                 @Valid @RequestBody UpdateEventRequest request) {
-        requireOrganizer();
         return eventService.update(id, request, actorContext.getActorId());
     }
 
-    private void requireOrganizer() {
-        if (!actorContext.isOrganizer()) {
-            throw new EventAccessDeniedException("Only organizers can manage events");
-        }
-    }
 }

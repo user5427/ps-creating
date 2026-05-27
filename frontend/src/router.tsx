@@ -1,5 +1,6 @@
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router'
 import { RootLayout } from './components/layout/RootLayout'
+import { checkRoleAccess } from './hooks/useAuth'
 import { EventsListPage } from './features/events/pages/EventsListPage'
 import { EventDetailPage } from './features/events/pages/EventDetailPage'
 import { EventFormPage } from './features/events/pages/EventFormPage'
@@ -9,6 +10,10 @@ import { BookingSummaryPage } from './features/events/pages/BookingSummaryPage'
 import { CodeScanPage } from './features/code/pages/CodeScanPage'
 import { MyTicketsPage } from './features/code/pages/MyTicketsPage'
 import { MyTicketsEventPage } from './features/code/pages/MyTicketsEventPage'
+import { LoginPage } from "./features/auth/pages/LoginPage";
+import { RegisterPage } from "./features/auth/pages/RegisterPage";
+import { AccessDeniedPage } from "./features/auth/pages/AccessDeniedPage";
+
 
 function parseCheckoutSearch(search: Record<string, unknown>) {
   const quantityValue = Number(search.quantity)
@@ -66,6 +71,12 @@ const eventCreateRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/new',
   validateSearch: parseEventFormSearch,
+  beforeLoad: () => {
+    const access = checkRoleAccess('ORGANIZER')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: () => <EventFormPage mode="create" />,
 })
 
@@ -86,38 +97,93 @@ const eventEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/$eventId/edit',
   validateSearch: parseEventFormSearch,
+  beforeLoad: () => {
+    const access = checkRoleAccess('ORGANIZER')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: () => <EventFormPage mode="edit" />,
 })
 
 const codeScanRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/codes/scan',
+  beforeLoad: () => {
+    const access = checkRoleAccess('ORGANIZER')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: CodeScanPage,
 })
 
 const myTicketsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-tickets',
+  beforeLoad: () => {
+    const access = checkRoleAccess('ATTENDEE')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: MyTicketsPage,
 })
 
 const myTicketsEventRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-tickets/$eventId',
+  beforeLoad: () => {
+    const access = checkRoleAccess('ATTENDEE')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: MyTicketsEventPage,
 })
 
 const myEventsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-events',
+  beforeLoad: () => {
+    const access = checkRoleAccess('ORGANIZER')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: MyEventsPage,
 })
 
 const eventDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-events/$eventId',
+  beforeLoad: () => {
+    const access = checkRoleAccess('ORGANIZER')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: EventDashboardPage,
 })
+
+const loginRoute = createRoute({
+    getParentRoute: () => rootRoute,
+    path: "/login",
+    component: LoginPage,
+});
+
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/register",
+  component: RegisterPage,
+});
+
+const accessDeniedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/access-denied",
+  component: AccessDeniedPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   eventsListRoute,
@@ -130,6 +196,9 @@ const routeTree = rootRoute.addChildren([
   myTicketsEventRoute,
   myEventsRoute,
   eventDashboardRoute,
+  loginRoute,
+  registerRoute,
+  accessDeniedRoute,
 ])
 
 export const router = createRouter({ routeTree })

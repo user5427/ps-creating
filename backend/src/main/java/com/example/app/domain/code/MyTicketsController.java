@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/tickets/me")
@@ -25,21 +26,16 @@ public class MyTicketsController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ATTENDEE')")
     public Page<MyTicketEventSummaryResponse> listMyTickets(@PageableDefault(size = 12) Pageable pageable) {
-        requireAttendee();
         return codeService.listMyTickets(actorContext.getActorId(), pageable);
     }
 
     @GetMapping("/events/{eventId}")
+    @PreAuthorize("hasRole('ATTENDEE')")
     public MyTicketsByEventResponse listMyTicketsForEvent(@PathVariable UUID eventId,
                                                           @PageableDefault(size = 6) Pageable pageable) {
-        requireAttendee();
         return codeService.listMyTicketsForEvent(actorContext.getActorId(), eventId, pageable);
     }
 
-    private void requireAttendee() {
-        if (actorContext.isOrganizer()) {
-            throw new CodeAccessDeniedException("Only attendees can view their ticket wallet");
-        }
-    }
 }

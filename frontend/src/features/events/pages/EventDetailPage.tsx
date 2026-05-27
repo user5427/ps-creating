@@ -15,13 +15,13 @@ import {
 import { useNavigate, useParams } from '@tanstack/react-router'
 import { format } from 'date-fns'
 import { AxiosError } from 'axios'
-import { useAppStore } from '../../../store/appStore'
+import { selectVisibleRole, useAppStore } from '../../../store/appStore'
 import { SoldOutChip } from '../components/SoldOutChip'
 import { useEvent } from '../hooks'
 
 export function EventDetailPage() {
   const { eventId } = useParams({ from: '/events/$eventId' })
-  const role = useAppStore((s) => s.role)
+  const role = useAppStore(selectVisibleRole)
   const actorId = useAppStore((s) => s.actorId)
   const navigate = useNavigate()
   const { data: event, isLoading, isError, error, refetch } = useEvent(eventId)

@@ -12,16 +12,15 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { format } from 'date-fns'
-import { useAppStore } from '../../../store/appStore'
 import { useMyTicketGroups } from '../hooks'
 
 const PAGE_SIZE = 12
 
 export function MyTicketsPage() {
   const [page, setPage] = useState(0)
-  const role = useAppStore((s) => s.role)
+  const navigate = useNavigate()
   const { data, isLoading, isError, refetch } = useMyTicketGroups(page, PAGE_SIZE)
 
   return (
@@ -58,7 +57,9 @@ export function MyTicketsPage() {
           <Stack spacing={2}>
             {data?.content.map((group) => (
               <Card key={group.eventId} variant="outlined">
-                <CardActionArea component={Link} to="/my-tickets/$eventId" params={{ eventId: group.eventId }}>
+                <CardActionArea
+                  onClick={() => navigate({ to: '/my-tickets/$eventId', params: { eventId: group.eventId } })}
+                >
                   <CardContent>
                     <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
                       <Box>

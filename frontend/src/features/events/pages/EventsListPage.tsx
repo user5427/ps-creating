@@ -16,6 +16,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { selectVisibleRole, useAppStore } from "../../../store/appStore";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useAppStore } from "../../../store/appStore";
 import { EventCard } from "../components/EventCard";
@@ -29,6 +31,55 @@ function endOfDay(dateInput: string) {
   return new Date(`${dateInput}T23:59:59.999`).getTime();
 }
 
+function applyFilters(
+  events: EventResponse[],
+  filters: {
+    category: string;
+    location: string;
+    startDate: string;
+    endDate: string;
+  },
+) {
+  const category = filters.category.trim().toLowerCase();
+  const location = filters.location.trim().toLowerCase();
+  const hasStartDate = filters.startDate.length > 0;
+  const hasEndDate = filters.endDate.length > 0;
+  const startTs = hasStartDate ? startOfDay(filters.startDate) : null;
+  const endTs = hasEndDate ? endOfDay(filters.endDate) : null;
+
+  return events.filter((event) => {
+    const eventStartTs = new Date(event.startTime).getTime();
+
+    if (category && event.category.trim().toLowerCase() !== category) {
+      return false;
+    }
+
+    if (location && !event.venue.toLowerCase().includes(location)) {
+      return false;
+    }
+
+    if (startTs !== null && eventStartTs < startTs) return false;
+
+    if (endTs !== null && eventStartTs > endTs) return false;
+
+    return true;
+  });
+}
+
+function applySort(events: EventResponse[], sortBy: SortOption) {
+  return [...events].sort((a, b) => {
+    if (sortBy === "PRICE_ASC") {
+      return a.price - b.price;
+    }
+
+    if (sortBy === "PRICE_DESC") {
+      return b.price - a.price;
+    }
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
+
 export function EventsListPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/events" });
@@ -36,6 +87,12 @@ export function EventsListPage() {
 
   const role = useAppStore((s) => s.role);
   const { data: categoryOptions = [] } = useEventCategories();
+  const role = useAppStore(selectVisibleRole);
+  const navigate = useNavigate();
+  const { data, isLoading, isError, refetch } = useEvents(
+    0,
+    CATALOG_FETCH_SIZE,
+  );
 
   const filters = useMemo(
     () => ({
@@ -118,6 +175,7 @@ export function EventsListPage() {
             onClick={() => navigate({ to: "/events/new", search: { returnTo: "/events" } })}
             variant="contained"
             size="large"
+            onClick={() => navigate({ to: '/events/new', search: { returnTo: '/events' } })}
           >
             Create event
           </Button>

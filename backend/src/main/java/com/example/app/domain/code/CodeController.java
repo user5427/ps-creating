@@ -10,6 +10,7 @@ import java.net.URI;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 @RestController
 @RequestMapping("/api/codes")
@@ -24,8 +25,8 @@ public class CodeController {
     }
 
     @PostMapping("/generate")
+    @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<CodeResponse> generate(@Valid @RequestBody GenerateCodeRequest request) {
-        requireOrganizer();
         CodeResponse created = codeService.generate(request);
         return ResponseEntity
                 .created(URI.create("/api/codes/" + created.id()))
@@ -33,8 +34,8 @@ public class CodeController {
     }
 
     @PostMapping("/scan")
+    @PreAuthorize("hasRole('ORGANIZER')")
     public ScanCodeResponse scan(@Valid @RequestBody ScanCodeRequest request) {
-        requireOrganizer();
         return codeService.scan(request);
     }
 
@@ -43,9 +44,5 @@ public class CodeController {
         return codeService.view(id, actorContext.getActorId(), actorContext.getRole());
     }
 
-    private void requireOrganizer() {
-        if (!actorContext.isOrganizer()) {
-            throw new CodeAccessDeniedException("Only organizers can generate or scan QR codes");
-        }
-    }
+    
 }

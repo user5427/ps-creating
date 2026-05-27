@@ -1,12 +1,17 @@
-import { AppBar, Box, Button, Stack, ToggleButton, ToggleButtonGroup, Toolbar, Typography } from '@mui/material'
+import { AppBar, Button, Stack, Toolbar, Typography, Chip } from '@mui/material'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { selectVisibleRole, useAppStore } from '../../store/appStore'
 import { defaultEventsSearch } from '../../router'
 import { useAppStore, type Role } from '../../store/appStore'
 
 export function TopNav() {
   const navigate = useNavigate()
-  const role = useAppStore((s) => s.role)
-  const setRole = useAppStore((s) => s.setRole)
+  const token = useAppStore((s) => s.token)
+  const user = useAppStore((s) => s.user)
+  const logout = useAppStore((s) => s.logout)
+  const displayRole = useAppStore(selectVisibleRole)
+
+  const isAuthenticated = !!token && !!user
 
   return (
     <AppBar position="sticky">
@@ -34,17 +39,17 @@ export function TopNav() {
           >
             Events
           </Button>
-          {role === 'ORGANIZER' && (
+          {displayRole === 'ORGANIZER' && (
             <Button component={Link} to="/my-events" color="inherit" sx={{ color: 'text.primary' }}>
               My events
             </Button>
           )}
-          {role === 'ORGANIZER' && (
+          {displayRole === 'ORGANIZER' && (
             <Button component={Link} to="/codes/scan" color="inherit" sx={{ color: 'text.primary' }}>
               Scan QR code
             </Button>
           )}
-          {role === 'ORGANIZER' && (
+          {displayRole === 'ORGANIZER' && (
             <Button
               component={Link}
               to="/events/new"
@@ -54,7 +59,7 @@ export function TopNav() {
               Create event
             </Button>
           )}
-          {role === 'ATTENDEE' && (
+          {displayRole === 'ATTENDEE' && (
             <Button component={Link} to="/my-tickets" color="inherit" sx={{ color: 'text.primary' }}>
               My tickets
             </Button>
@@ -62,20 +67,39 @@ export function TopNav() {
         </Stack>
 
         <Stack direction="row" spacing={2} alignItems="center">
-          {import.meta.env.DEV && (
-            <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-              <ToggleButtonGroup
-                size="small"
-                value={role}
-                exclusive
-                onChange={(_, next: Role | null) => next && setRole(next)}
-                aria-label="Dev role toggle"
-              >
-                <ToggleButton value="ATTENDEE">Attendee</ToggleButton>
-                <ToggleButton value="ORGANIZER">Organizer</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
+          {import.meta.env.DEV && isAuthenticated && (
+            <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', md: 'block' } }}>
+              Logged in as: {user.role}
+            </Typography>
           )}
+           {isAuthenticated ? (
+             <>
+               <Chip
+                 label={`${user?.email} (${displayRole})`}
+                 size="small"
+                 sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+               />
+              <Button
+                color="inherit"
+                onClick={() => {
+                  logout()
+                  navigate({ to: '/events' })
+                }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button color="inherit" onClick={() => navigate({ to: '/login' })}>
+                Login
+              </Button>
+              <Button color="inherit" onClick={() => navigate({ to: '/register' })}>
+                Register
+              </Button>
+            </>
+          )}
+
           <Button
             variant="contained"
             onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
