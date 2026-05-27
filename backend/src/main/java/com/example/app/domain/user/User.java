@@ -38,6 +38,13 @@ public class User {
 
     protected User() {}
 
+    @PrePersist
+    void onCreate() {
+        if (createdAt == null) {
+            createdAt = OffsetDateTime.now();
+        }
+    }
+
     public User(UUID id, String email, String hashedPassword, String firstName, String lastName, Role role) {
         this.id = id;
         this.email = email;

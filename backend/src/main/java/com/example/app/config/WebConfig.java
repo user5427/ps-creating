@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final String allowedOrigin;
 
     public WebConfig(ActorInterceptor actorInterceptor,
-                     @Value("${app.cors.allowed-origin:http://localhost:5173}") String allowedOrigin) {
+                     @Value("${spring.web.cors.allowed-origins:http://localhost:5173}") String allowedOrigin) {
         this.actorInterceptor = actorInterceptor;
         this.allowedOrigin = allowedOrigin;
     }
