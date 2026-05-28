@@ -13,16 +13,9 @@ Required variables:
 - `STRIPE_API_KEY` - Get from [Stripe Dashboard](https://dashboard.stripe.com)
 - `STRIPE_WEBHOOK_SECRET` - Get from Stripe Webhooks settings
 
-(For local development, smtp configuration is not needed,
-it will connect to the mailpit docker container with default credentials, web ui accessible at port 8025)
-Email (for ticket confirmation with QR code):
-- `MAIL_HOST` - SMTP host (default `localhost`)
-- `MAIL_PORT` - SMTP port (default `1025`)
-- `MAIL_USERNAME` - SMTP username
-- `MAIL_PASSWORD` - SMTP password
-- `MAIL_SMTP_AUTH` - `true`/`false`
-- `MAIL_SMTP_STARTTLS_ENABLE` - `true`/`false`
-- `MAIL_FROM` - sender email address
+Email (Twilio SendGrid):
+- `SENDGRID_API_KEY` - SendGrid API key with Mail Send permissions
+- `MAIL_FROM` - sender email address (must be verified in SendGrid)
 
 SMS reminders use the existing Twilio setup. Attendee records must include a phone number in E.164 format, for example `+15555550123`, or SMS reminders will be skipped for that user.
 

@@ -25,20 +25,38 @@ export function RegisterPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    const phoneIsValid = phoneNumber.trim().length === 0 || phoneRegex.test(phoneNumber.trim());
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const trimmedEmail = email.trim();
+    const emailIsValid = trimmedEmail.length > 0 && emailRegex.test(trimmedEmail);
+
+    const phoneRegex = /^\+[1-9]\d{1,14}$/;
+    const trimmedPhone = phoneNumber.trim();
+    const phoneIsEmpty = trimmedPhone.length === 0;
+    const phoneIsValid = phoneIsEmpty || phoneRegex.test(trimmedPhone);
 
     const handleRegister = async () => {
         setLoading(true);
         setError(null);
 
         try {
+            if (!emailIsValid) {
+                setError("Please enter a valid email address.");
+                return;
+            }
+
             if (!phoneIsValid) {
                 setError("Please enter a valid phone number (E.164 format, e.g. +15555550123).");
                 return;
             }
 
-            await authApi.register({ email, password, firstName, lastName, phoneNumber, role });
+            await authApi.register({
+                email: trimmedEmail,
+                password,
+                firstName,
+                lastName,
+                phoneNumber: trimmedPhone,
+                role,
+            });
             navigate({ to: "/login", search: {} });
         } catch (err: any) {
             setError("Registration failed");
@@ -79,8 +97,17 @@ export function RegisterPage() {
                         <TextField
                             label="Email"
                             fullWidth
+                            type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            error={email.length > 0 && !emailIsValid}
+                            helperText={
+                                email.length === 0
+                                    ? ""
+                                    : emailIsValid
+                                        ? ""
+                                        : "Please enter a valid email address"
+                            }
                         />
 
                         <TextField
@@ -98,9 +125,11 @@ export function RegisterPage() {
                             onChange={(e) => setPhoneNumber(e.target.value)}
                             error={!phoneIsValid}
                             helperText={
-                                phoneIsValid
+                                phoneIsEmpty
                                     ? "Use E.164 format, e.g. +15555550123"
-                                    : "Invalid phone number format"
+                                    : phoneIsValid
+                                        ? ""
+                                        : "Phone number must start with + and use E.164 format"
                             }
                         />
 
@@ -123,7 +152,7 @@ export function RegisterPage() {
                         <Button
                             variant="contained"
                             onClick={handleRegister}
-                            disabled={loading || !phoneIsValid}
+                            disabled={loading || !phoneIsValid || !emailIsValid}
                         >
                             {loading ? "Registering..." : "Register"}
                         </Button>

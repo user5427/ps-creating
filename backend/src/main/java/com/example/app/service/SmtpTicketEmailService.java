@@ -1,56 +1,62 @@
 package com.example.app.service;
 
 import com.example.app.util.QrImageUtils;
-import jakarta.mail.internet.MimeMessage;
-import java.nio.charset.StandardCharsets;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.objects.Personalization;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Service
 public class SmtpTicketEmailService implements TicketEmailService {
 
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm XXX");
 
-    private final JavaMailSender mailSender;
+    private final SendGrid sendGrid;
+    private final String sendGridApiKey;
     private final QrImageUtils qrImageUtils;
     private final String fromAddress;
 
-    public SmtpTicketEmailService(JavaMailSender mailSender,
-            QrImageUtils qrImageUtils,
-            @Value("${app.mail.from:no-reply@app.local}") String fromAddress) {
-        this.mailSender = mailSender;
+    public SmtpTicketEmailService(QrImageUtils qrImageUtils,
+            @Value("${app.mail.from:no-reply@app.local}") String fromAddress,
+            @Value("${app.mail.sendgrid-api-key:}") String sendGridApiKey) {
         this.qrImageUtils = qrImageUtils;
         this.fromAddress = fromAddress;
+        this.sendGridApiKey = sendGridApiKey;
+        this.sendGrid = new SendGrid(sendGridApiKey);
     }
 
     @Override
     public void sendTicketConfirmation(TicketConfirmationEmail confirmation) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name());
-
-            helper.setFrom(Objects.requireNonNull(fromAddress));
-            helper.setTo(Objects.requireNonNull(confirmation.recipientEmail()));
-            helper.setSubject("Your ticket confirmation: " + confirmation.eventTitle());
-
             byte[] qrPng = Objects.requireNonNull(qrImageUtils.createPng(confirmation.qrPayload(), 300));
-            String qrDataUri = "data:image/png;base64," + Base64.getEncoder().encodeToString(qrPng);
+            String qrBase64 = Base64.getEncoder().encodeToString(qrPng);
+            String qrDataUri = "data:image/png;base64," + qrBase64;
 
             String htmlBody = buildHtmlBody(confirmation, qrDataUri);
-            helper.setText(Objects.requireNonNull(htmlBody), true);
+            Mail mail = buildBaseMail(
+                    confirmation.recipientEmail(),
+                    "Your ticket confirmation: " + confirmation.eventTitle(),
+                    htmlBody);
 
-            helper.addAttachment("ticket-qr.png", new ByteArrayResource(qrPng), "image/png");
+            Attachments attachment = new Attachments();
+            attachment.setContent(qrBase64);
+            attachment.setType("image/png");
+            attachment.setFilename("ticket-qr.png");
+            attachment.setDisposition("attachment");
+            mail.addAttachments(attachment);
 
-            mailSender.send(message);
+            sendEmail(mail);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to send ticket confirmation email", ex);
         }
@@ -59,13 +65,6 @@ public class SmtpTicketEmailService implements TicketEmailService {
     @Override
     public void sendEventReminder(EventReminderEmail reminder) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, false, StandardCharsets.UTF_8.name());
-
-            helper.setFrom(Objects.requireNonNull(fromAddress));
-            helper.setTo(Objects.requireNonNull(reminder.recipientEmail()));
-            helper.setSubject("Event reminder: " + reminder.eventTitle());
-
             String start = DATE_FORMAT.format(reminder.eventStartTime());
             String htmlBody = """
                     <html>
@@ -80,10 +79,42 @@ public class SmtpTicketEmailService implements TicketEmailService {
                     </html>
                     """.formatted(reminder.recipientFirstName(), reminder.eventTitle(), reminder.eventVenue(), start);
 
-            helper.setText(htmlBody, true);
-            mailSender.send(message);
+            Mail mail = buildBaseMail(
+                    reminder.recipientEmail(),
+                    "Event reminder: " + reminder.eventTitle(),
+                    htmlBody);
+            sendEmail(mail);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to send event reminder email", ex);
+        }
+    }
+
+    private Mail buildBaseMail(String recipientEmail, String subject, String htmlBody) {
+        Email from = new Email(Objects.requireNonNull(fromAddress));
+        Mail mail = new Mail();
+        mail.setFrom(from);
+        mail.setSubject(subject);
+        mail.addContent(new Content("text/html", Objects.requireNonNull(htmlBody)));
+
+        Personalization personalization = new Personalization();
+        personalization.addTo(new Email(Objects.requireNonNull(recipientEmail)));
+        mail.addPersonalization(personalization);
+        return mail;
+    }
+
+    private void sendEmail(Mail mail) throws Exception {
+        if (!StringUtils.hasText(sendGridApiKey)) {
+            throw new IllegalStateException("SENDGRID_API_KEY is not configured");
+        }
+
+        Request request = new Request();
+        request.setMethod(Method.POST);
+        request.setEndpoint("mail/send");
+        request.setBody(mail.build());
+
+        Response response = sendGrid.api(request);
+        if (response.getStatusCode() >= 400) {
+            throw new IllegalStateException("SendGrid mail failed with status " + response.getStatusCode());
         }
     }
 
