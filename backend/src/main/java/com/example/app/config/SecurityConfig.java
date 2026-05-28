@@ -42,6 +42,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                         .requestMatchers("/api/health", "/auth/**").permitAll()
+                        .requestMatchers("/api/webhooks/stripe").permitAll()
                         // Everything else requires authentication; method-level @PreAuthorize handles role checks
                         .anyRequest().authenticated()
                 )
