@@ -19,6 +19,7 @@ export type RegisterPayload = {
     firstName: string;
     lastName: string;
     role?: 'ATTENDEE' | 'ORGANIZER' | 'SCANNER'
+    phoneNumber?: string;
 }
 
 export async function register(payload: RegisterPayload) {

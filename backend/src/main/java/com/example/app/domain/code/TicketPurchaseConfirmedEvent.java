@@ -6,6 +6,7 @@ import java.util.UUID;
 public record TicketPurchaseConfirmedEvent(
         String recipientEmail,
         String recipientFirstName,
+        String recipientPhoneNumber,
         String eventTitle,
         String eventVenue,
         OffsetDateTime eventStartTime,

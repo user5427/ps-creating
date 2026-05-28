@@ -21,15 +21,24 @@ export function RegisterPage() {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [role, setRole] = useState<'ATTENDEE' | 'ORGANIZER' | 'SCANNER'>('ATTENDEE')
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    const phoneIsValid = phoneNumber.trim().length === 0 || phoneRegex.test(phoneNumber.trim());
 
     const handleRegister = async () => {
         setLoading(true);
         setError(null);
 
         try {
-            await authApi.register({ email, password, firstName, lastName, role });
+            if (!phoneIsValid) {
+                setError("Please enter a valid phone number (E.164 format, e.g. +15555550123).");
+                return;
+            }
+
+            await authApi.register({ email, password, firstName, lastName, phoneNumber, role });
             navigate({ to: "/login", search: {} });
         } catch (err: any) {
             setError("Registration failed");
@@ -82,6 +91,19 @@ export function RegisterPage() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
 
+                        <TextField
+                            label="Phone number (optional)"
+                            fullWidth
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            error={!phoneIsValid}
+                            helperText={
+                                phoneIsValid
+                                    ? "Use E.164 format, e.g. +15555550123"
+                                    : "Invalid phone number format"
+                            }
+                        />
+
                         <ToggleButtonGroup
                             size="small"
                             value={role}
@@ -101,7 +123,7 @@ export function RegisterPage() {
                         <Button
                             variant="contained"
                             onClick={handleRegister}
-                            disabled={loading}
+                            disabled={loading || !phoneIsValid}
                         >
                             {loading ? "Registering..." : "Register"}
                         </Button>
