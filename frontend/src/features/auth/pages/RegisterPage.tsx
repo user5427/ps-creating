@@ -30,10 +30,9 @@ export function RegisterPage() {
 
         try {
             await authApi.register({ email, password, firstName, lastName, role });
-            // After successful registration redirect to login
             navigate({ to: "/login", search: {} });
         } catch (err: any) {
-            setError(err.message || "Registration failed");
+            setError("Registration failed");
         } finally {
             setLoading(false);
         }

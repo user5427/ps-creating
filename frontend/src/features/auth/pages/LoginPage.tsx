@@ -28,13 +28,11 @@ export function LoginPage() {
         try {
             const data = await login({ email, password });
 
-            // store token and user in app store
             useAppStore.getState().setAuth(data.token, data.user);
 
-            // redirect after login
             navigate({ to: "/events", search: defaultEventsSearch });
         } catch (err: any) {
-            setError(err.message || "Login failed");
+            setError("Login failed");
         } finally {
             setLoading(false);
         }

@@ -22,7 +22,7 @@ export function MyEventsPage() {
   const [page, setPage] = useState(1)
   const { role } = useAppStore()
   const navigate = useNavigate()
-  const { data, isLoading, isError, error } = useOrganizerEvents(page - 1, PAGE_SIZE)
+  const { data, isLoading, isError } = useOrganizerEvents(page - 1, PAGE_SIZE)
 
   useEffect(() => {
     if (role !== 'ORGANIZER') {
@@ -38,7 +38,7 @@ export function MyEventsPage() {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">
-          Failed to load events: {error instanceof Error ? error.message : 'Unknown error'}
+          Failed to load events.
         </Alert>
       </Container>
     )
