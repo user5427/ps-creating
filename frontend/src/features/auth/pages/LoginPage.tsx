@@ -8,13 +8,14 @@ import {
     Paper,
     Stack,
 } from "@mui/material";
-import { useNavigate } from "@tanstack/react-router";
-import { defaultEventsSearch } from '../../../router'
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { login } from "../api";
 import { useAppStore } from '../../../store/appStore'
 
 export function LoginPage() {
     const navigate = useNavigate();
+    const search = useSearch({ strict: false })
+    const returnTo = (search as any)?.returnTo || "/events"
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -30,7 +31,7 @@ export function LoginPage() {
 
             useAppStore.getState().setAuth(data.token, data.user);
 
-            navigate({ to: "/events", search: defaultEventsSearch });
+            navigate({ to: returnTo as any })
         } catch (err: any) {
             setError("Login failed");
         } finally {

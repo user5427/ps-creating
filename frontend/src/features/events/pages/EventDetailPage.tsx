@@ -23,6 +23,8 @@ export function EventDetailPage() {
   const { eventId } = useParams({ from: '/events/$eventId' })
   const role = useAppStore(selectVisibleRole)
   const actorId = useAppStore((s) => s.actorId)
+  const token = useAppStore((s) => s.token)
+  const user = useAppStore((s) => s.user)
   const navigate = useNavigate()
   const { data: event, isLoading, isError, error, refetch } = useEvent(eventId)
   const [quantity, setQuantity] = useState(1)
@@ -62,6 +64,7 @@ export function EventDetailPage() {
   const isOwner = role === 'ORGANIZER' && event.organizerId === actorId
   const maxSelectableTickets = Math.max(event.remainingSeats, 1)
   const boundedQuantity = Math.min(Math.max(quantity, 1), maxSelectableTickets)
+  const isAuthenticated = !!token && !!user
 
   return (
     <>
@@ -138,23 +141,30 @@ export function EventDetailPage() {
                   size="small"
                   inputProps={{ min: 1, max: maxSelectableTickets, step: 1 }}
                 />
-                  {!isOrganizer && <Button
-                      variant="contained"
-                      size="large"
-                      fullWidth
-                      disabled={event.soldOut}
-                      onClick={() =>
-                          navigate({
-                              to: '/events/$eventId/checkout',
-                              params: {eventId},
-                              search: {quantity: boundedQuantity},
-                          })
-                      }
-                  >
-                      {event.soldOut ? 'Sold out' :
-                          event.price === 0 ? 'Claim for free'
-                              : 'Purchase ticket'}
-                  </Button>}
+                    {!isOrganizer && <Button
+                          variant="contained"
+                          size="large"
+                          fullWidth
+                          disabled={event.soldOut}
+                          onClick={() => {
+                            if (!isAuthenticated) {
+                              navigate({
+                                to: '/login',
+                                search: { returnTo: `/events/${eventId}/checkout?quantity=${boundedQuantity}` },
+                              })
+                              return
+                            }
+                            navigate({
+                                to: '/events/$eventId/checkout',
+                                params: {eventId},
+                                search: {quantity: boundedQuantity},
+                            })
+                          }}
+                      >
+                          {event.soldOut ? 'Sold out' :
+                              event.price === 0 ? 'Claim for free'
+                                  : 'Purchase ticket'}
+                      </Button>}
                 {isOwner && (
                   <Button
                     onClick={() =>
