@@ -20,7 +20,7 @@ export function RegisterPage() {
     const [password, setPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
-    const [role, setRole] = useState<'ATTENDEE' | 'ORGANIZER'>('ATTENDEE')
+    const [role, setRole] = useState<'ATTENDEE' | 'ORGANIZER' | 'SCANNER'>('ATTENDEE')
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -91,6 +91,7 @@ export function RegisterPage() {
                         >
                             <ToggleButton value="ATTENDEE">Attendee</ToggleButton>
                             <ToggleButton value="ORGANIZER">Organizer</ToggleButton>
+                            <ToggleButton value="SCANNER">Scanner</ToggleButton>
                         </ToggleButtonGroup>
 
                         {error && (

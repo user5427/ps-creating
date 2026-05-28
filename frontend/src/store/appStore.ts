@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { User as AuthUser } from '../features/auth/schemas'
 
-export type Role = 'ORGANIZER' | 'ATTENDEE'
+export type Role = 'ORGANIZER' | 'ATTENDEE' | 'SCANNER'
 
 // Read seeded actor UUIDs from Vite env vars when provided so backend seed
 // changes don't require a frontend code change. Defaults match the UUIDs
@@ -11,6 +11,8 @@ const SEEDED_ORGANIZER_ID =
   import.meta.env.VITE_DEV_ORGANIZER_ID ?? '00000000-0000-0000-0000-000000000001'
 const SEEDED_ATTENDEE_ID =
   import.meta.env.VITE_DEV_ATTENDEE_ID ?? '00000000-0000-0000-0000-000000000002'
+const SEEDED_SCANNER_ID =
+  import.meta.env.VITE_DEV_SCANNER_ID ?? '00000000-0000-0000-0000-000000000003'
 
 interface AppState {
   actorId: string
@@ -34,7 +36,12 @@ export const useAppStore = create<AppState>()(
       setRole: (role) =>
         set({
           role,
-          actorId: role === 'ORGANIZER' ? SEEDED_ORGANIZER_ID : SEEDED_ATTENDEE_ID,
+          actorId:
+            role === 'ORGANIZER'
+              ? SEEDED_ORGANIZER_ID
+              : role === 'SCANNER'
+                ? SEEDED_SCANNER_ID
+                : SEEDED_ATTENDEE_ID,
         }),
       setAuth: (token, user) =>
         set({

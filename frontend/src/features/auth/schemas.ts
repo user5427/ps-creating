@@ -4,7 +4,7 @@ export const UserSchema = z.object({
     // backend uses UUIDs for user ids
     id: z.string(),
     email: z.string().email(),
-    role: z.enum(["ATTENDEE", "ORGANIZER"]),
+    role: z.enum(["ATTENDEE", "ORGANIZER", "SCANNER"]),
 });
 
 export const LoginResponseSchema = z.object({

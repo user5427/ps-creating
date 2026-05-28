@@ -1,6 +1,6 @@
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router'
 import { RootLayout } from './components/layout/RootLayout'
-import { checkRoleAccess } from './hooks/useAuth'
+import { checkRoleAccess, getAuthSnapshot } from './hooks/useAuth'
 import { EventsListPage } from './features/events/pages/EventsListPage'
 import { EventDetailPage } from './features/events/pages/EventDetailPage'
 import { EventFormPage } from './features/events/pages/EventFormPage'
@@ -48,6 +48,13 @@ export const defaultEventsSearch = {
   sortBy: 'NEW' as const,
 }
 
+function redirectScannerToScanPage() {
+  const { isAuthenticated, role } = getAuthSnapshot()
+  if (isAuthenticated && role === 'SCANNER') {
+    throw redirect({ to: '/codes/scan' })
+  }
+}
+
 const rootRoute = createRootRoute({
   component: RootLayout,
 })
@@ -56,6 +63,10 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   beforeLoad: () => {
+    const { isAuthenticated, role } = getAuthSnapshot()
+    if (isAuthenticated && role === 'SCANNER') {
+      throw redirect({ to: '/codes/scan' })
+    }
     throw redirect({ to: '/events', search: defaultEventsSearch })
   },
 })
@@ -64,6 +75,9 @@ const eventsListRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events',
   validateSearch: parseEventsListSearch,
+  beforeLoad: () => {
+    redirectScannerToScanPage()
+  },
   component: EventsListPage,
 })
 
@@ -83,6 +97,9 @@ const eventCreateRoute = createRoute({
 const eventDetailRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/$eventId',
+  beforeLoad: () => {
+    redirectScannerToScanPage()
+  },
   component: EventDetailPage,
 })
 
@@ -90,6 +107,12 @@ const eventCheckoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/events/$eventId/checkout',
   validateSearch: parseCheckoutSearch,
+  beforeLoad: () => {
+    const access = checkRoleAccess('ATTENDEE')
+    if (!access.isAllowed) {
+      throw redirect({ to: access.redirectTo ?? '/access-denied' })
+    }
+  },
   component: BookingSummaryPage,
 })
 
@@ -110,7 +133,7 @@ const codeScanRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/codes/scan',
   beforeLoad: () => {
-    const access = checkRoleAccess('ORGANIZER')
+    const access = checkRoleAccess('SCANNER')
     if (!access.isAllowed) {
       throw redirect({ to: access.redirectTo ?? '/access-denied' })
     }
@@ -169,12 +192,24 @@ const eventDashboardRoute = createRoute({
 const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: "/login",
+    beforeLoad: () => {
+      const { isAuthenticated, role } = getAuthSnapshot()
+      if (isAuthenticated && role === 'SCANNER') {
+        throw redirect({ to: '/codes/scan' })
+      }
+    },
     component: LoginPage,
 });
 
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
+  beforeLoad: () => {
+    const { isAuthenticated, role } = getAuthSnapshot()
+    if (isAuthenticated && role === 'SCANNER') {
+      throw redirect({ to: '/codes/scan' })
+    }
+  },
   component: RegisterPage,
 });
 

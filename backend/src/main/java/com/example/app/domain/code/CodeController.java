@@ -34,7 +34,7 @@ public class CodeController {
     }
 
     @PostMapping("/scan")
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('SCANNER')")
     public ScanCodeResponse scan(@Valid @RequestBody ScanCodeRequest request) {
         return codeService.scan(request);
     }
