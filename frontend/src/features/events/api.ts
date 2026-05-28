@@ -63,30 +63,27 @@ export interface ClaimFreeTicketsPayload {
 const CONFIGURED_API = import.meta.env.VITE_API_URL || 'http://localhost:8080/api'
 const BACKEND_ROOT = CONFIGURED_API.replace(/\/api\/?$/, '')
 
-export async function fetchEvents(page: number, size: number): Promise<Page<EventResponse>> {
-  const url = `${BACKEND_ROOT}/api/events`
-  const { data } = await apiClient.get(url, { params: { page, size } })
 export async function fetchEvents(
   page: number,
   size: number,
-  filters: EventListFilters,
+  filters?: EventListFilters,
 ): Promise<Page<EventResponse>> {
-  const { data } = await apiClient.get('/events', {
-    params: {
-      page,
-      size,
-      category: filters.category || undefined,
-      location: filters.location || undefined,
-      startDate: filters.startDate || undefined,
-      endDate: filters.endDate || undefined,
-      sort: SORT_TO_API[filters.sortBy],
-    },
-  })
+  const params: Record<string, unknown> = { page, size }
+  if (filters) {
+    params.category = filters.category || undefined
+    params.location = filters.location || undefined
+    params.startDate = filters.startDate || undefined
+    params.endDate = filters.endDate || undefined
+    params.sort = SORT_TO_API[filters.sortBy]
+  }
+
+  const url = `${BACKEND_ROOT}/api/events`
+  const { data } = await apiClient.get(url, { params })
   return PageSchema(EventResponseSchema).parse(data)
 }
 
 export async function fetchEventCategories(): Promise<string[]> {
-  const { data } = await apiClient.get('/events/categories')
+  const { data } = await apiClient.get(`${BACKEND_ROOT}/api/events/categories`)
   return EventCategoryListSchema.parse(data)
 }
 

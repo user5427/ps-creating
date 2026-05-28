@@ -1,5 +1,6 @@
 import { Box, Button, Container, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
+import { defaultEventsSearch } from '../../../router'
 
 export function AccessDeniedPage() {
   const navigate = useNavigate()
@@ -23,7 +24,7 @@ export function AccessDeniedPage() {
           </Typography>
           <Button
             variant="contained"
-            onClick={() => navigate({ to: '/events' })}
+            onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
           >
             Back to Events
           </Button>

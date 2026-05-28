@@ -63,7 +63,7 @@ export function EventDashboardPage() {
   const { eventId } = useParams({ from: '/my-events/$eventId' })
   const { role } = useAppStore()
   const navigate = useNavigate()
-  const { data: event, isLoading, isError, error } = useEvent(eventId)
+  const { data: event, isLoading, isError } = useEvent(eventId)
 
   useEffect(() => {
     if (role !== 'ORGANIZER') {
@@ -83,7 +83,7 @@ export function EventDashboardPage() {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Alert severity="error">
-          Failed to load event: {error instanceof Error ? error.message : 'Unknown error'}
+          Failed to load event
         </Alert>
         <Button
           startIcon={<ArrowBackIcon />}

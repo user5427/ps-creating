@@ -89,6 +89,9 @@ export function CodeScanPage() {
   const scanMutation = useScanCode()
   const viewMutation = useViewCode()
 
+  const generateErrorMessage = 'Failed to generate QR code.'
+  const viewErrorMessage =  'Failed to view QR code.'
+
   const scanStatus = useMemo(() => {
     if (scanMutation.isPending) {
       return { severity: 'info' as const, text: 'Validating QR code...' }
@@ -246,7 +249,7 @@ export function CodeScanPage() {
                       Generate QR code
                     </Button>
                     {generateMutation.error && (
-                      <Alert severity="error">Failed to generate QR code.</Alert>
+                      <Alert severity="error">{generateErrorMessage}</Alert>
                     )}
                     {generatedCode && <CodeCard title="Generated QR code" code={generatedCode} />}
                   </Stack>
@@ -278,7 +281,7 @@ export function CodeScanPage() {
                     <Button type="submit" variant="outlined" disabled={viewMutation.isPending}>
                       View QR code
                     </Button>
-                    {viewMutation.error && <Alert severity="error">Failed to view QR code.</Alert>}
+                    {viewMutation.error && <Alert severity="error">{viewErrorMessage}</Alert>}
                     {viewedCode && <CodeCard title="Viewed QR code" code={viewedCode} />}
                   </Stack>
                 </Box>
