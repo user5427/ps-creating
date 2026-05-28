@@ -139,6 +139,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
             eventPublisher.publishEvent(new TicketPurchaseConfirmedEvent(
                     attendee.getEmail(),
                     attendee.getFirstName(),
+                    attendee.getPhoneNumber(),
                     event.getTitle(),
                     event.getVenue(),
                     event.getStartTime(),
@@ -203,6 +204,7 @@ public class DefaultCheckoutPaymentService implements CheckoutPaymentService {
                         eventPublisher.publishEvent(new TicketPurchaseConfirmedEvent(
                                 attendee.getEmail(),
                                 attendee.getFirstName(),
+                            attendee.getPhoneNumber(),
                                 event.getTitle(),
                                 event.getVenue(),
                                 event.getStartTime(),

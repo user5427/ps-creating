@@ -6,6 +6,7 @@ import com.example.app.domain.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,6 +54,10 @@ public class AuthService {
                 request.getLastName(),
                 role
         );
+
+        if (StringUtils.hasText(request.getPhoneNumber())) {
+            user.setPhoneNumber(request.getPhoneNumber().trim());
+        }
 
         User savedUser = userRepository.save(user);
 
