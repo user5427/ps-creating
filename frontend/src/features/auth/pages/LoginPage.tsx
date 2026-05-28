@@ -9,6 +9,7 @@ import {
     Stack,
 } from "@mui/material";
 import { useNavigate } from "@tanstack/react-router";
+import { defaultEventsSearch } from '../../../router'
 import { login } from "../api";
 import { useAppStore } from '../../../store/appStore'
 
@@ -31,7 +32,7 @@ export function LoginPage() {
             useAppStore.getState().setAuth(data.token, data.user);
 
             // redirect after login
-            navigate({ to: "/events" });
+            navigate({ to: "/events", search: defaultEventsSearch });
         } catch (err: any) {
             setError(err.message || "Login failed");
         } finally {

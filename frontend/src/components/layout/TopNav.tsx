@@ -1,8 +1,8 @@
 import { AppBar, Button, Stack, Toolbar, Typography, Chip } from '@mui/material'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { selectVisibleRole, useAppStore } from '../../store/appStore'
+import { selectVisibleRole } from '../../store/appStore'
 import { defaultEventsSearch } from '../../router'
-import { useAppStore, type Role } from '../../store/appStore'
+import { useAppStore } from '../../store/appStore'
 
 export function TopNav() {
   const navigate = useNavigate()
@@ -67,11 +67,6 @@ export function TopNav() {
         </Stack>
 
         <Stack direction="row" spacing={2} alignItems="center">
-          {import.meta.env.DEV && isAuthenticated && (
-            <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', md: 'block' } }}>
-              Logged in as: {user.role}
-            </Typography>
-          )}
            {isAuthenticated ? (
              <>
                <Chip
@@ -83,7 +78,7 @@ export function TopNav() {
                 color="inherit"
                 onClick={() => {
                   logout()
-                  navigate({ to: '/events' })
+                  navigate({ to: '/events', search: defaultEventsSearch })
                 }}
               >
                 Logout
