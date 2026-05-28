@@ -11,11 +11,12 @@ import {
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { login } from "../api";
 import { useAppStore } from '../../../store/appStore'
+import { defaultEventsSearch } from '../../../router'
 
 export function LoginPage() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false })
-    const returnTo = (search as any)?.returnTo || "/events"
+    const returnTo = typeof (search as any)?.returnTo === 'string' ? (search as any).returnTo : undefined
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -31,7 +32,21 @@ export function LoginPage() {
 
             useAppStore.getState().setAuth(data.token, data.user);
 
-            navigate({ to: returnTo as any })
+            if (returnTo) {
+                if (returnTo === '/events') {
+                    navigate({ to: '/events', search: defaultEventsSearch })
+                    return
+                }
+                navigate({ to: returnTo as any })
+                return
+            }
+
+            if (data.user.role === 'SCANNER') {
+                navigate({ to: '/codes/scan' })
+                return
+            }
+
+            navigate({ to: '/events', search: defaultEventsSearch })
         } catch (err: any) {
             setError("Login failed");
         } finally {

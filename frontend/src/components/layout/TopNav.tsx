@@ -27,7 +27,7 @@ export function TopNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isAuthenticated = !!token && !!user
-
+  const isScanner = isAuthenticated && displayRole === 'SCANNER'
   const handleNavClick = (action: () => void) => {
     action()
     setMobileMenuOpen(false)
@@ -35,14 +35,29 @@ export function TopNav() {
 
   const navItems = (
     <Stack spacing={1} sx={{ width: '100%' }}>
-      <Button
-        color="inherit"
-        fullWidth
-        sx={{ justifyContent: 'flex-start', color: 'text.primary' }}
-        onClick={() => handleNavClick(() => navigate({ to: '/events', search: defaultEventsSearch }))}
-      >
-        Events
-      </Button>
+      {!isScanner && (
+        <Button
+          color="inherit"
+          fullWidth
+          sx={{ justifyContent: 'flex-start', color: 'text.primary' }}
+          onClick={() => handleNavClick(() => navigate({ to: '/events', search: defaultEventsSearch }))}
+        >
+          Events
+        </Button>
+      )}
+
+      {isScanner && (
+        <Button
+          component={Link}
+          to="/codes/scan"
+          color="inherit"
+          fullWidth
+          sx={{ justifyContent: 'flex-start', color: 'text.primary' }}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          Scan QR code
+        </Button>
+      )}
 
       {displayRole === 'ORGANIZER' && (
         <>
@@ -58,16 +73,6 @@ export function TopNav() {
           </Button>
           <Button
             component={Link}
-            to="/codes/scan"
-            color="inherit"
-            fullWidth
-            sx={{ justifyContent: 'flex-start', color: 'text.primary' }}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Scan QR code
-          </Button>
-          <Button
-            component={Link}
             to="/events/new"
             color="inherit"
             fullWidth
@@ -78,7 +83,18 @@ export function TopNav() {
           </Button>
         </>
       )}
-
+      {isScanner && (
+            <Button
+            component={Link}
+            to="/codes/scan"
+            color="inherit"
+            fullWidth
+            sx={{ justifyContent: 'flex-start', color: 'text.primary' }}
+            onClick={() => setMobileMenuOpen(false)}
+        >
+          Scan QR code
+        </Button>
+      )}
       {displayRole === 'ATTENDEE' && (
         <Button
           component={Link}
@@ -116,20 +132,19 @@ export function TopNav() {
 
         {/* Desktop Navigation */}
         <Stack direction="row" spacing={{ xs: 1, md: 3 }} sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' }, ml: 4, justifyContent: 'center' }}>
-          <Button
-            color="inherit"
-            sx={{ color: 'text.primary', fontSize: '0.9rem' }}
-            onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
-          >
-            Events
-          </Button>
+          {!isScanner && (
+            <Button
+              color="inherit"
+              sx={{ color: 'text.primary', fontSize: '0.9rem' }}
+              onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
+            >
+              Events
+            </Button>
+          )}
           {displayRole === 'ORGANIZER' && (
             <>
               <Button component={Link} to="/my-events" color="inherit" sx={{ color: 'text.primary', fontSize: '0.9rem' }}>
                 My events
-              </Button>
-              <Button component={Link} to="/codes/scan" color="inherit" sx={{ color: 'text.primary', fontSize: '0.9rem' }}>
-                Scan QR
               </Button>
               <Button component={Link} to="/events/new" color="inherit" sx={{ color: 'text.primary', fontSize: '0.9rem' }}>
                 Create
@@ -139,6 +154,11 @@ export function TopNav() {
           {displayRole === 'ATTENDEE' && (
             <Button component={Link} to="/my-tickets" color="inherit" sx={{ color: 'text.primary', fontSize: '0.9rem' }}>
               My tickets
+            </Button>
+          )}
+          {isScanner && (
+            <Button component={Link} to="/codes/scan" color="inherit" sx={{ color: 'text.primary', fontSize: '0.9rem' }}>
+              Scan QR
             </Button>
           )}
         </Stack>
@@ -173,13 +193,15 @@ export function TopNav() {
               </Button>
             </>
           )}
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
-          >
-            Browse
-          </Button>
+          {!isScanner && (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => navigate({ to: '/events', search: defaultEventsSearch })}
+            >
+              Browse
+            </Button>
+          )}
         </Stack>
 
         {/* Mobile Auth & Menu Button */}
