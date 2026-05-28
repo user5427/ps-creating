@@ -103,7 +103,6 @@ export function MyEventsPage() {
           <Typography variant="h6" color="text.secondary">
             No events created yet
           </Typography>
-          <Button variant="contained" onClick={() => navigate({ to: '/events/new', search: { returnTo: '/my-events' } })}/>
           <Button
             variant="contained"
             onClick={() => navigate({ to: '/events/new', search: { returnTo: '/my-events' } })}
