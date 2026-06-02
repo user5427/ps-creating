@@ -280,6 +280,7 @@ export function EventFormPage({ mode }: Props) {
                 <DateTimePicker
                   label="Start time"
                   value={field.value}
+                  disablePast
                   onChange={(v) => field.onChange(v)}
                   disabled={formDisabled}
                   slotProps={{
@@ -300,6 +301,7 @@ export function EventFormPage({ mode }: Props) {
                 <DateTimePicker
                   label="End time"
                   value={field.value}
+                  disablePast
                   onChange={(v) => field.onChange(v)}
                   disabled={formDisabled}
                   slotProps={{
@@ -330,7 +332,7 @@ export function EventFormPage({ mode }: Props) {
                   error={!!fieldState.error || !!fieldErrors.capacity}
                   helperText={fieldState.error?.message ?? fieldErrors.capacity}
                   required
-                  disabled={formDisabled}
+                  disabled={formDisabled || mode=='edit'}
                 />
               )}
             />
@@ -352,7 +354,7 @@ export function EventFormPage({ mode }: Props) {
                   error={!!fieldState.error || !!fieldErrors.price}
                   helperText={fieldState.error?.message ?? fieldErrors.price}
                   required
-                  disabled={formDisabled}
+                  disabled={formDisabled || mode=='edit'}
                 />
               )}
             />
