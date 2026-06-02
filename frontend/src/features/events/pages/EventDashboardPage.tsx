@@ -133,7 +133,7 @@ export function EventDashboardPage() {
           <CardMedia
             component="img"
             height="400"
-            image={event.imageUrl || 'https://via.placeholder.com/600x400?text=Event'}
+            image={event.imageUrl || 'https://lapena.org/wp-content/plugins/events-calendar-pro/src/resources/images/tribe-event-placeholder-image.svg'}
             alt={event.title}
             sx={{ borderRadius: 2, objectFit: 'cover' }}
           />

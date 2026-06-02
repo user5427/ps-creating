@@ -72,12 +72,11 @@ export function EventDetailPage() {
         sx={{
           height: { xs: 220, md: 360 },
           backgroundColor: '#F3F4F6',
-          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'none',
+          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'url(https://lapena.org/wp-content/plugins/events-calendar-pro/src/resources/images/tribe-event-placeholder-image.svg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       />
-
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Grid container spacing={6}>
           <Grid item xs={12} md={8}>
@@ -126,21 +125,21 @@ export function EventDetailPage() {
                   : `${event.remainingSeats} of ${event.capacity} seats remaining`}
               </Typography>
               <Stack spacing={1.5}>
-                <TextField
-                  label="Quantity"
-                  type="number"
-                  value={boundedQuantity}
-                  onChange={(e) => {
-                    const parsed = Number(e.target.value)
-                    if (!Number.isFinite(parsed)) return
-                    const clamped = Math.min(Math.max(Math.trunc(parsed), 1), maxSelectableTickets)
-                    setQuantity(clamped)
-                  }}
-                  disabled={event.soldOut}
-                  fullWidth
-                  size="small"
-                  inputProps={{ min: 1, max: maxSelectableTickets, step: 1 }}
-                />
+                  {!isOrganizer && <TextField
+                      label="Quantity"
+                      type="number"
+                      value={boundedQuantity}
+                      onChange={(e) => {
+                          const parsed = Number(e.target.value)
+                          if (!Number.isFinite(parsed)) return
+                          const clamped = Math.min(Math.max(Math.trunc(parsed), 1), maxSelectableTickets)
+                          setQuantity(clamped)
+                      }}
+                      disabled={event.soldOut}
+                      fullWidth
+                      size="small"
+                      inputProps={{min: 1, max: maxSelectableTickets, step: 1}}
+                  />}
                     {!isOrganizer && <Button
                           variant="contained"
                           size="large"

@@ -25,7 +25,7 @@ export function EventCard({ event }: Props) {
             position: 'relative',
             aspectRatio: '16 / 9',
             backgroundColor: '#F3F4F6',
-            backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'none',
+            backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'url(https://lapena.org/wp-content/plugins/events-calendar-pro/src/resources/images/tribe-event-placeholder-image.svg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}

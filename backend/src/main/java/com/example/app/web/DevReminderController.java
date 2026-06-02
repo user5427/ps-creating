@@ -22,8 +22,8 @@ public class DevReminderController {
 
     @PostMapping("/send-now")
     public Map<String, Object> sendNow(
-            @RequestParam(defaultValue = "24") int hoursFromNow,
-            @RequestParam(defaultValue = "25") int hoursToNow) {
+            @RequestParam(defaultValue = "0") int hoursFromNow,
+            @RequestParam(defaultValue = "48") int hoursToNow) {
         OffsetDateTime now = OffsetDateTime.now();
         OffsetDateTime windowStart = now.plusHours(hoursFromNow);
         OffsetDateTime windowEnd = now.plusHours(hoursToNow);
