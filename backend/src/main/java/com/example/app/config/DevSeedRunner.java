@@ -38,6 +38,7 @@ public class DevSeedRunner implements CommandLineRunner {
     private final EventRepository eventRepository;
     private final UUID organizerId;
     private final UUID attendeeId;
+    private final UUID scannerId;
     private final PasswordEncoder passwordEncoder;
 
         @PersistenceContext
@@ -47,10 +48,12 @@ public class DevSeedRunner implements CommandLineRunner {
                          EventRepository eventRepository,
                          @Value("${app.dev.organizer-id}") UUID organizerId,
                          @Value("${app.dev.attendee-id}") UUID attendeeId,
+                         @Value("${app.dev.scanner-id}") UUID scannerId,
                          PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.organizerId = organizerId;
+        this.scannerId = scannerId;
         this.attendeeId = attendeeId;
         this.passwordEncoder = passwordEncoder;
     }
@@ -67,14 +70,18 @@ public class DevSeedRunner implements CommandLineRunner {
         // Spring Data's save() would call merge() and then choke because the
         // @Version field is null on a "detached-looking" entity.
         // Hash the dev seed password using the application's PasswordEncoder
-        final String hashed = "$2a$10$nBlWWzCdMavPKm.jdZJBA.nf.oxPaH/VJt7wX6UhlcMLxElG2"; // "password" hashed with BCrypt
+        final String hashed = "$2a$10$3Pk6e2uqwk8Nwai8CDIxt.Qz/X/WoukbWkQ/STjMyksv9L4mBzLAa"; // "password" hashed with BCrypt
 
         if (userRepository.findById(organizerId).isEmpty()) {
-            entityManager.persist(new User(organizerId, "organizer@demo.test", hashed, "Tomas", "Žilinskas", Role.ORGANIZER));
+            entityManager.persist(new User(organizerId, "organizer@gmail.com", hashed, "Tomas", "Žilinskas", Role.ORGANIZER));
             log.info("Seeded organizer {}", organizerId);
         }
+        if (userRepository.findById(scannerId).isEmpty()) {
+            entityManager.persist(new User(scannerId, "scanner@gmail.com", hashed, "Eglė", "Kazlauskaitė", Role.SCANNER));
+            log.info("Seeded attendee {}", scannerId);
+        }
         if (userRepository.findById(attendeeId).isEmpty()) {
-            entityManager.persist(new User(attendeeId, "attendee@demo.test", hashed, "Eglė", "Kazlauskaitė", Role.ATTENDEE));
+            entityManager.persist(new User(attendeeId, "attendee@gmail.com", hashed, "Eglė", "Kazlauskaitė", Role.ATTENDEE));
             log.info("Seeded attendee {}", attendeeId);
         }
     }

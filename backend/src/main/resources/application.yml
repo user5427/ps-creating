@@ -60,6 +60,7 @@ app:
   dev: 
     organizer-id: 00000000-0000-0000-0000-000000000001
     attendee-id:  00000000-0000-0000-0000-000000000002
+    scanner-id:   00000000-0000-0000-0000-000000000003
   jwt:
     # JWT secret used for HS256 signing. For local development this can be
     # overridden with the APP_JWT_SECRET environment variable. Must be at
