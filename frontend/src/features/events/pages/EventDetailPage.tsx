@@ -125,21 +125,21 @@ export function EventDetailPage() {
                   : `${event.remainingSeats} of ${event.capacity} seats remaining`}
               </Typography>
               <Stack spacing={1.5}>
-                <TextField
-                  label="Quantity"
-                  type="number"
-                  value={boundedQuantity}
-                  onChange={(e) => {
-                    const parsed = Number(e.target.value)
-                    if (!Number.isFinite(parsed)) return
-                    const clamped = Math.min(Math.max(Math.trunc(parsed), 1), maxSelectableTickets)
-                    setQuantity(clamped)
-                  }}
-                  disabled={event.soldOut}
-                  fullWidth
-                  size="small"
-                  inputProps={{ min: 1, max: maxSelectableTickets, step: 1 }}
-                />
+                  {!isOrganizer && <TextField
+                      label="Quantity"
+                      type="number"
+                      value={boundedQuantity}
+                      onChange={(e) => {
+                          const parsed = Number(e.target.value)
+                          if (!Number.isFinite(parsed)) return
+                          const clamped = Math.min(Math.max(Math.trunc(parsed), 1), maxSelectableTickets)
+                          setQuantity(clamped)
+                      }}
+                      disabled={event.soldOut}
+                      fullWidth
+                      size="small"
+                      inputProps={{min: 1, max: maxSelectableTickets, step: 1}}
+                  />}
                     {!isOrganizer && <Button
                           variant="contained"
                           size="large"
