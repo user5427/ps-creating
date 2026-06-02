@@ -45,8 +45,7 @@ export function MyEventCard({ event }: MyEventCardProps) {
       <CardMedia
         component="img"
         height="200"
-        image={event.imageUrl || 'https://via.placeholder.com/500x200?text=Event'}
-        alt={event.title}
+        image={event.imageUrl || 'https://lapena.org/wp-content/plugins/events-calendar-pro/src/resources/images/tribe-event-placeholder-image.svg'}
         sx={{ objectFit: 'cover' }}
       />
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>

@@ -72,12 +72,11 @@ export function EventDetailPage() {
         sx={{
           height: { xs: 220, md: 360 },
           backgroundColor: '#F3F4F6',
-          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'none',
+          backgroundImage: event.imageUrl ? `url(${event.imageUrl})` : 'url(https://lapena.org/wp-content/plugins/events-calendar-pro/src/resources/images/tribe-event-placeholder-image.svg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       />
-
       <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
         <Grid container spacing={6}>
           <Grid item xs={12} md={8}>
