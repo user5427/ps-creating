@@ -135,7 +135,12 @@ public class DevSeedRunner implements CommandLineRunner {
                                                 "An evening of arias from Verdi, Puccini, and Wagner.",
                                                 "Classical", "LNOBT, Vilnius",
                                                 "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=1200",
-                                                now.plusDays(60), 3, new BigDecimal("45.00"), 800, 90));
+                                                now.plusDays(60), 3, new BigDecimal("45.00"), 800, 90),
+                                buildEvent("Opera at the Palace Version 2",
+                                        "An evening of arias from Verdi, Puccini, and Wagner.",
+                                        "Classical", "LNOBT, Vilnius",
+                                        "https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=1200",
+                                        now.plusDays(90), 3, new BigDecimal("50.00"), 400, 90));
 
                 eventRepository.saveAll(Objects.requireNonNull(samples));
                 log.info("Seeded {} demo events", samples.size());

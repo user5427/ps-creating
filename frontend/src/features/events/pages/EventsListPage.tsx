@@ -21,7 +21,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { EventCard } from "../components/EventCard";
 import { useEventCategories, useEvents } from "../hooks";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 9;
 
 type SortOption = "NEW" | "PRICE_ASC" | "PRICE_DESC";
 

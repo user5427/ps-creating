@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
 @Service
 public class SmtpTicketEmailService implements TicketEmailService {
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm XXX");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final SendGrid sendGrid;
     private final String sendGridApiKey;
@@ -71,13 +71,13 @@ public class SmtpTicketEmailService implements TicketEmailService {
                       <body style=\"font-family: Arial, sans-serif; color: #1f2937;\">
                         <h2>Event reminder</h2>
                         <p>Hello %s,</p>
-                        <p>This is a tiny reminder that you have a ticket for the following event happening in right about 24 hours:</p>
+                        <p>This is a tiny reminder that you have a ticket for the following event happening in %s:</p>
                                                 <p><strong>Event:</strong> %s</p>
                         <p><strong>Venue:</strong> %s</p>
                         <p><strong>Start time:</strong> %s</p>
                       </body>
                     </html>
-                    """.formatted(reminder.recipientFirstName(), reminder.eventTitle(), reminder.eventVenue(), start);
+                    """.formatted(reminder.recipientFirstName(), start, reminder.eventTitle(), reminder.eventVenue(), start);
 
             Mail mail = buildBaseMail(
                     reminder.recipientEmail(),
